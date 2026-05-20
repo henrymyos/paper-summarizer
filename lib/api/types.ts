@@ -11,7 +11,9 @@ export type ApiChunk = {
   page_number: number | null;
   chunk_index: number;
   text: string;
-  similarity: number;
+  // null when the chunk came from persisted history (we don't store the
+  // per-query similarity score). The UI hides the metric in that case.
+  similarity: number | null;
 };
 
 export type AskResponse = {

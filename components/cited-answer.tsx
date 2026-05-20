@@ -50,8 +50,10 @@ export function CitedAnswer({ answer, chunks }: Props) {
                       [{i + 1}]
                     </span>
                     <span className="flex-1 text-[var(--muted)]">
-                      page {c.page_number ?? "?"} · similarity{" "}
-                      {c.similarity.toFixed(2)}
+                      page {c.page_number ?? "?"}
+                      {c.similarity !== null && (
+                        <> · similarity {c.similarity.toFixed(2)}</>
+                      )}
                     </span>
                   </button>
                   {isOpen && (

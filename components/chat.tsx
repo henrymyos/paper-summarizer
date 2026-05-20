@@ -22,10 +22,50 @@ export function Chat({ activeDocument, documents }: Props) {
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Reset history when the scope changes.
+  // Load persisted history whenever the active scope changes.
   useEffect(() => {
-    setMessages([]);
+    let cancelled = false;
     setError(null);
+    setMessages([]);
+
+    const params = activeDocument?.id
+      ? `?documentId=${encodeURIComponent(activeDocument.id)}`
+      : "";
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/queries${params}`, { cache: "no-store" });
+        if (!res.ok) return;
+        const { queries } = (await res.json()) as {
+          queries: {
+            id: number;
+            question: string;
+            answer: string;
+            chunks: ChatMessage extends { role: "assistant"; chunks: infer C }
+              ? C
+              : never;
+          }[];
+        };
+        if (cancelled) return;
+
+        const hydrated: ChatMessage[] = queries.flatMap((q) => [
+          { role: "user", id: `u-${q.id}`, content: q.question },
+          {
+            role: "assistant",
+            id: `a-${q.id}`,
+            answer: q.answer,
+            chunks: q.chunks,
+          },
+        ]);
+        setMessages(hydrated);
+      } catch {
+        // Non-fatal — empty history is the same as a fresh thread.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeDocument?.id]);
 
   useEffect(() => {
