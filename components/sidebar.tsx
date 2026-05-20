@@ -58,15 +58,17 @@ export function Sidebar({
   }
 
   return (
-    <aside className="w-72 shrink-0 border-r border-[var(--border)] bg-[var(--background)] flex flex-col">
-      <div className="px-5 py-5 border-b border-[var(--border)]">
+    <aside className="w-72 shrink-0 border-r border-[var(--border)] bg-zinc-950/60 backdrop-blur-sm flex flex-col">
+      <div className="px-5 py-5 border-b border-[var(--border)] bg-gradient-to-b from-[var(--accent)]/[0.08] to-transparent">
         <div className="flex items-center gap-2">
-          <SparkleIcon className="w-5 h-5 text-[var(--accent)]" />
+          <div className="relative flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--accent)]/15 border border-[var(--accent)]/30 shadow-[0_0_18px_rgba(96,165,250,0.35)]">
+            <SparkleIcon className="w-4 h-4 text-[var(--accent)]" />
+          </div>
           <h1 className="text-base font-semibold tracking-tight">
             Paper Summarizer
           </h1>
         </div>
-        <p className="mt-1 text-xs text-[var(--muted)]">
+        <p className="mt-2 text-xs text-[var(--muted)]">
           Ask your PDFs. Get cited answers.
         </p>
       </div>
@@ -86,8 +88,9 @@ export function Sidebar({
           disabled={uploading}
           onClick={() => fileRef.current?.click()}
           className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md
-                     bg-[var(--foreground)] text-[var(--background)]
-                     hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                     bg-gradient-to-b from-[var(--accent)] to-blue-500 text-zinc-950
+                     hover:brightness-110 shadow-[0_4px_18px_-6px_rgba(96,165,250,0.65)]
+                     disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           <UploadIcon className="w-4 h-4" />
           {uploading ? "Indexing…" : "Upload PDF"}
@@ -152,11 +155,20 @@ function DocItem({
 }) {
   return (
     <div
-      className={`group flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer transition-colors
-                  ${active ? "bg-zinc-800/80" : "hover:bg-zinc-900/60"}`}
+      className={`group relative flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer transition-colors
+                  ${
+                    active
+                      ? "bg-[var(--accent)]/12 ring-1 ring-inset ring-[var(--accent)]/30"
+                      : "hover:bg-zinc-900/60"
+                  }`}
       onClick={onClick}
     >
-      <FileIcon className="w-4 h-4 shrink-0 text-[var(--muted)]" />
+      {active && (
+        <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-[var(--accent)]" />
+      )}
+      <FileIcon
+        className={`w-4 h-4 shrink-0 ${active ? "text-[var(--accent)]" : "text-[var(--muted)]"}`}
+      />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium truncate">{title}</p>
         <p className="text-[11px] text-[var(--muted)] truncate">{subtitle}</p>

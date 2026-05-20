@@ -140,7 +140,10 @@ export function Chat({ activeDocument, documents }: Props) {
             {messages.map((m) =>
               m.role === "user" ? (
                 <li key={m.id} className="flex justify-end">
-                  <div className="max-w-[80%] rounded-2xl rounded-br-md bg-zinc-800 text-zinc-100 px-4 py-2.5 text-sm">
+                  <div className="max-w-[80%] rounded-2xl rounded-br-md
+                                  bg-gradient-to-br from-[var(--accent)]/25 to-blue-500/15
+                                  border border-[var(--accent)]/30 text-zinc-50 px-4 py-2.5 text-sm
+                                  shadow-[0_4px_22px_-10px_rgba(96,165,250,0.55)]">
                     {m.content}
                   </div>
                 </li>
@@ -173,7 +176,8 @@ export function Chat({ activeDocument, documents }: Props) {
             submit();
           }}
           className="max-w-3xl mx-auto flex items-end gap-2 bg-zinc-900/60 border border-[var(--border)] rounded-2xl
-                     focus-within:border-zinc-600 transition-colors px-3 py-2"
+                     focus-within:border-[var(--accent)]/50 focus-within:shadow-[0_0_0_3px_rgba(96,165,250,0.12)]
+                     transition-all px-3 py-2"
         >
           <textarea
             rows={1}
@@ -228,8 +232,10 @@ function EmptyState({
 
   return (
     <div className="max-w-2xl mx-auto h-full flex flex-col items-center justify-center text-center pb-12">
-      <div className="w-12 h-12 rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent)]/20 flex items-center justify-center mb-4">
-        <SparkleIcon className="w-6 h-6 text-[var(--accent)]" />
+      <div className="relative w-14 h-14 rounded-2xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center mb-4
+                      shadow-[0_0_40px_-5px_rgba(96,165,250,0.55)]">
+        <SparkleIcon className="w-7 h-7 text-[var(--accent)]" />
+        <div className="absolute inset-0 rounded-2xl bg-[var(--accent)]/10 blur-xl -z-10" />
       </div>
       <h3 className="text-lg font-medium">
         {hasDocuments ? "Ask a question" : "Upload a PDF to get started"}
@@ -245,7 +251,9 @@ function EmptyState({
             <button
               key={s}
               onClick={() => onPick(s)}
-              className="text-left text-xs px-3 py-2.5 rounded-lg border border-[var(--border)] bg-zinc-900/40 hover:bg-zinc-900 hover:border-zinc-700 transition-colors"
+              className="text-left text-xs px-3 py-2.5 rounded-lg border border-[var(--border)] bg-zinc-900/40
+                         hover:bg-[var(--accent)]/10 hover:border-[var(--accent)]/40 hover:text-zinc-50
+                         transition-colors"
             >
               {s}
             </button>
@@ -258,7 +266,8 @@ function EmptyState({
 
 function AnswerCard({ answer, chunks }: { answer: string; chunks: ApiChunk[] }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-zinc-900/40 px-5 py-4">
+    <div className="relative rounded-2xl border border-[var(--border)] bg-zinc-900/40 px-5 py-4 overflow-hidden">
+      <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--accent)]/60 to-transparent" />
       <CitedAnswer answer={answer} chunks={chunks} />
     </div>
   );
@@ -266,11 +275,12 @@ function AnswerCard({ answer, chunks }: { answer: string; chunks: ApiChunk[] }) 
 
 function ThinkingCard() {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-zinc-900/40 px-5 py-4 flex items-center gap-3 text-sm text-[var(--muted)]">
+    <div className="relative rounded-2xl border border-[var(--border)] bg-zinc-900/40 px-5 py-4 flex items-center gap-3 text-sm text-[var(--muted)] overflow-hidden">
+      <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--accent)]/60 to-transparent" />
       <span className="flex gap-1">
-        <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 pulse-dot" style={{ animationDelay: "0ms" }} />
-        <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 pulse-dot" style={{ animationDelay: "200ms" }} />
-        <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 pulse-dot" style={{ animationDelay: "400ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] pulse-dot" style={{ animationDelay: "0ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] pulse-dot" style={{ animationDelay: "200ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] pulse-dot" style={{ animationDelay: "400ms" }} />
       </span>
       Searching passages and drafting an answer…
     </div>
