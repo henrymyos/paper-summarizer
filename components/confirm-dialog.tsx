@@ -43,17 +43,17 @@ export function ConfirmDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-title"
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed top-0 right-0 bottom-0 left-72 z-50 flex items-center justify-center"
     >
-      {/* Backdrop */}
+      {/* Backdrop — covers only the main chat area, leaving the sidebar visible */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/55 backdrop-blur-sm"
         onClick={onCancel}
       />
 
       {/* Modal card */}
       <div
-        className="relative w-[min(420px,calc(100vw-2rem))] rounded-2xl border border-[var(--border)]
+        className="relative w-[min(420px,calc(100%-2rem))] rounded-2xl border border-[var(--border)]
                    bg-zinc-950/95 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
