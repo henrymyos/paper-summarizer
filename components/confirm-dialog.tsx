@@ -47,11 +47,11 @@ export function ConfirmDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-title"
-      className="fixed top-0 right-0 bottom-0 left-72 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center"
     >
-      {/* Backdrop — covers only the main chat area, leaving the sidebar visible */}
+      {/* Backdrop covers the whole viewport */}
       <div
-        className="absolute inset-0 bg-black/55 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onCancel}
       />
 

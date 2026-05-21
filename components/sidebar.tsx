@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import type { DocumentRow } from "@/lib/api/types";
 import { FileIcon, SparkleIcon, TrashIcon, UploadIcon } from "@/components/icons";
-import { ConfirmPopover } from "@/components/confirm-popover";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 type Props = {
   documents: DocumentRow[];
@@ -27,7 +27,6 @@ export function Sidebar({
   const [pendingDelete, setPendingDelete] = useState<{
     id: string;
     title: string;
-    anchor: { top: number; left: number };
   } | null>(null);
 
   async function handleFile(file: File) {
@@ -135,8 +134,8 @@ export function Sidebar({
               onClick={() => onSelect(doc.id)}
               title={doc.title}
               subtitle={`${doc.page_count ?? "?"} pages · ${formatRelative(doc.created_at)}`}
-              onDelete={(anchor) =>
-                setPendingDelete({ id: doc.id, title: doc.title, anchor })
+              onDelete={() =>
+                setPendingDelete({ id: doc.id, title: doc.title })
               }
             />
           ))
@@ -147,13 +146,12 @@ export function Sidebar({
         Built with Next.js, Supabase, Voyage AI, Claude.
       </div>
 
-      <ConfirmPopover
+      <ConfirmDialog
         open={pendingDelete !== null}
-        anchor={pendingDelete?.anchor ?? null}
         title="Delete this document?"
         description={
           pendingDelete
-            ? `"${pendingDelete.title}" and all of its indexed chunks and conversations will be permanently removed.`
+            ? `"${pendingDelete.title}" and all of its indexed chunks and conversations will be permanently removed. This can't be undone.`
             : ""
         }
         confirmLabel="Delete"
@@ -177,13 +175,10 @@ function DocItem({
   onClick: () => void;
   title: string;
   subtitle: string;
-  onDelete?: (anchor: { top: number; left: number }) => void;
+  onDelete?: () => void;
 }) {
-  const rowRef = useRef<HTMLDivElement>(null);
-
   return (
     <div
-      ref={rowRef}
       className={`group relative flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer transition-colors
                   ${
                     active
@@ -206,13 +201,7 @@ function DocItem({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            const rect = rowRef.current?.getBoundingClientRect();
-            // Anchor the popover just to the right of the sidebar, vertically
-            // aligned with the clicked row.
-            const anchor = rect
-              ? { top: rect.top, left: rect.right + 12 }
-              : { top: 100, left: 300 };
-            onDelete(anchor);
+            onDelete();
           }}
           className="opacity-0 group-hover:opacity-100 text-[var(--muted)] hover:text-red-400 transition-opacity"
           aria-label="Delete document"
