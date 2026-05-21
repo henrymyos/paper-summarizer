@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { DocumentRow } from "@/lib/api/types";
 import { FileIcon, SparkleIcon, TrashIcon, UploadIcon } from "@/components/icons";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 type Props = {
   documents: DocumentRow[];
@@ -23,6 +24,10 @@ export function Sidebar({
   const [uploading, setUploading] = useState(false);
   const [uploadName, setUploadName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   async function handleFile(file: File) {
     setError(null);
@@ -48,8 +53,10 @@ export function Sidebar({
     }
   }
 
-  async function handleDelete(id: string, title: string) {
-    if (!confirm(`Delete "${title}"? This can't be undone.`)) return;
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    const { id } = pendingDelete;
+    setPendingDelete(null);
     const res = await fetch(`/api/documents/${id}`, { method: "DELETE" });
     if (res.ok) {
       if (activeDocumentId === id) onSelect(null);
@@ -127,7 +134,9 @@ export function Sidebar({
               onClick={() => onSelect(doc.id)}
               title={doc.title}
               subtitle={`${doc.page_count ?? "?"} pages · ${formatRelative(doc.created_at)}`}
-              onDelete={() => handleDelete(doc.id, doc.title)}
+              onDelete={() =>
+                setPendingDelete({ id: doc.id, title: doc.title })
+              }
             />
           ))
         )}
@@ -136,6 +145,21 @@ export function Sidebar({
       <div className="px-5 py-3 text-[11px] text-[var(--muted)] border-t border-[var(--border)]">
         Built with Next.js, Supabase, Voyage AI, Claude.
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Delete this document?"
+        description={
+          pendingDelete
+            ? `"${pendingDelete.title}" and all of its indexed chunks and conversations will be permanently removed. This can't be undone.`
+            : ""
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        destructive
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </aside>
   );
 }
