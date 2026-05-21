@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type {
-  ApiChunk,
-  AskResponse,
-  ChatMessage,
-  DocumentRow,
-} from "@/lib/api/types";
+import type { ApiChunk, ChatMessage, DocumentRow } from "@/lib/api/types";
 import { CitedAnswer } from "@/components/cited-answer";
 import { SendIcon, SparkleIcon } from "@/components/icons";
 
@@ -84,13 +79,18 @@ export function Chat({ activeDocument, documents }: Props) {
       id: `u-${Date.now()}`,
       content: q,
     };
-    setMessages((m) => [...m, userMsg]);
+    const assistantId = `a-${Date.now()}`;
+    setMessages((m) => [
+      ...m,
+      userMsg,
+      { role: "assistant", id: assistantId, answer: "", chunks: [] },
+    ]);
     setQuestion("");
     setBusy(true);
     setError(null);
 
     try {
-      const res = await fetch("/api/ask", {
+      const res = await fetch("/api/ask/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -98,17 +98,70 @@ export function Chat({ activeDocument, documents }: Props) {
           documentId: activeDocument?.id ?? null,
         }),
       });
-      const data: AskResponse & { error?: string } = await res.json();
-      if (!res.ok) throw new Error(data.error ?? `Ask failed (${res.status})`);
+      if (!res.ok || !res.body) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? `Ask failed (${res.status})`);
+      }
 
-      const asst: ChatMessage = {
-        role: "assistant",
-        id: `a-${Date.now()}`,
-        answer: data.answer,
-        chunks: data.chunks,
-      };
-      setMessages((m) => [...m, asst]);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let streamErr: string | null = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // SSE events are separated by a blank line.
+        const events = buffer.split("\n\n");
+        buffer = events.pop() ?? "";
+
+        for (const evt of events) {
+          const dataLine = evt
+            .split("\n")
+            .find((l) => l.startsWith("data: "));
+          if (!dataLine) continue;
+          let parsed: {
+            type: string;
+            text?: string;
+            chunks?: ApiChunk[];
+            message?: string;
+          };
+          try {
+            parsed = JSON.parse(dataLine.slice(6));
+          } catch {
+            continue;
+          }
+
+          if (parsed.type === "chunks" && parsed.chunks) {
+            const cs = parsed.chunks;
+            setMessages((m) =>
+              m.map((msg) =>
+                msg.id === assistantId && msg.role === "assistant"
+                  ? { ...msg, chunks: cs }
+                  : msg,
+              ),
+            );
+          } else if (parsed.type === "token" && parsed.text) {
+            const t = parsed.text;
+            setMessages((m) =>
+              m.map((msg) =>
+                msg.id === assistantId && msg.role === "assistant"
+                  ? { ...msg, answer: msg.answer + t }
+                  : msg,
+              ),
+            );
+          } else if (parsed.type === "error") {
+            streamErr = parsed.message ?? "Ask failed.";
+          }
+        }
+      }
+
+      if (streamErr) throw new Error(streamErr);
     } catch (e) {
+      // Drop the empty assistant placeholder so the error stands alone.
+      setMessages((m) => m.filter((msg) => msg.id !== assistantId));
       setError(e instanceof Error ? e.message : "Ask failed.");
     } finally {
       setBusy(false);
@@ -134,7 +187,11 @@ export function Chat({ activeDocument, documents }: Props) {
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6">
         {messages.length === 0 ? (
-          <EmptyState hasDocuments={hasDocuments} onPick={setQuestion} />
+          <EmptyState
+            hasDocuments={hasDocuments}
+            activeDocument={activeDocument}
+            onPick={setQuestion}
+          />
         ) : (
           <ul className="max-w-3xl mx-auto space-y-6">
             {messages.map((m) =>
@@ -152,11 +209,6 @@ export function Chat({ activeDocument, documents }: Props) {
                   <AnswerCard answer={m.answer} chunks={m.chunks} />
                 </li>
               ),
-            )}
-            {busy && (
-              <li>
-                <ThinkingCard />
-              </li>
             )}
             {error && (
               <li>
@@ -218,17 +270,26 @@ export function Chat({ activeDocument, documents }: Props) {
 
 function EmptyState({
   hasDocuments,
+  activeDocument,
   onPick,
 }: {
   hasDocuments: boolean;
+  activeDocument: DocumentRow | null;
   onPick: (q: string) => void;
 }) {
-  const suggestions = [
+  const docSummary = activeDocument?.summary?.trim();
+  const docQuestions =
+    activeDocument?.suggested_questions?.filter((q) => q && q.trim().length > 0) ?? [];
+
+  const fallbackSuggestions = [
     "Summarize this document in 3 bullet points.",
     "What is the main argument or claim?",
     "What methods or data are used?",
     "What are the limitations the authors mention?",
   ];
+
+  const suggestions =
+    docQuestions.length > 0 ? docQuestions : fallbackSuggestions;
 
   return (
     <div className="max-w-2xl mx-auto h-full flex flex-col items-center justify-center text-center pb-12">
@@ -237,52 +298,78 @@ function EmptyState({
         <SparkleIcon className="w-7 h-7 text-[var(--accent)]" />
         <div className="absolute inset-0 rounded-2xl bg-[var(--accent)]/10 blur-xl -z-10" />
       </div>
-      <h3 className="text-lg font-medium">
-        {hasDocuments ? "Ask a question" : "Upload a PDF to get started"}
-      </h3>
-      <p className="mt-1.5 text-sm text-[var(--muted)] max-w-md">
-        {hasDocuments
-          ? "Your question is embedded and matched against the most relevant passages. Claude answers using only those passages, with citations."
-          : "Drop a research paper, textbook chapter, or any PDF. We'll parse, chunk, and embed it so you can ask grounded questions."}
-      </p>
+
+      {activeDocument ? (
+        <>
+          <h3 className="text-lg font-medium">{activeDocument.title}</h3>
+          {docSummary ? (
+            <p className="mt-2 text-sm text-zinc-300 max-w-xl leading-relaxed">
+              {docSummary}
+            </p>
+          ) : (
+            <p className="mt-1.5 text-sm text-[var(--muted)] max-w-md">
+              Ask a question — Claude will answer using passages from this document.
+            </p>
+          )}
+        </>
+      ) : (
+        <>
+          <h3 className="text-lg font-medium">
+            {hasDocuments ? "Ask across your library" : "Upload a PDF to get started"}
+          </h3>
+          <p className="mt-1.5 text-sm text-[var(--muted)] max-w-md">
+            {hasDocuments
+              ? "Your question is embedded and matched against the most relevant passages across every document you've indexed. Claude answers using only those passages, with citations."
+              : "Drop a research paper, textbook chapter, or any PDF. We'll parse, chunk, and embed it so you can ask grounded questions."}
+          </p>
+        </>
+      )}
+
       {hasDocuments && (
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg">
-          {suggestions.map((s) => (
-            <button
-              key={s}
-              onClick={() => onPick(s)}
-              className="text-left text-xs px-3 py-2.5 rounded-lg border border-[var(--border)] bg-zinc-900/40
-                         hover:bg-[var(--accent)]/10 hover:border-[var(--accent)]/40 hover:text-zinc-50
-                         transition-colors"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        <>
+          {activeDocument && docQuestions.length > 0 && (
+            <p className="mt-6 text-[10px] uppercase tracking-wider text-[var(--muted)]">
+              Suggested for this document
+            </p>
+          )}
+          <div className={`${activeDocument && docQuestions.length > 0 ? "mt-2" : "mt-6"} grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg`}>
+            {suggestions.map((s) => (
+              <button
+                key={s}
+                onClick={() => onPick(s)}
+                className="text-left text-xs px-3 py-2.5 rounded-lg border border-[var(--border)] bg-zinc-900/40
+                           hover:bg-[var(--accent)]/10 hover:border-[var(--accent)]/40 hover:text-zinc-50
+                           transition-colors"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
 }
 
 function AnswerCard({ answer, chunks }: { answer: string; chunks: ApiChunk[] }) {
+  const isEmpty = answer.length === 0;
   return (
     <div className="relative rounded-2xl border border-[var(--border)] bg-zinc-900/40 px-5 py-4 overflow-hidden">
       <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--accent)]/60 to-transparent" />
-      <CitedAnswer answer={answer} chunks={chunks} />
-    </div>
-  );
-}
-
-function ThinkingCard() {
-  return (
-    <div className="relative rounded-2xl border border-[var(--border)] bg-zinc-900/40 px-5 py-4 flex items-center gap-3 text-sm text-[var(--muted)] overflow-hidden">
-      <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--accent)]/60 to-transparent" />
-      <span className="flex gap-1">
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] pulse-dot" style={{ animationDelay: "0ms" }} />
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] pulse-dot" style={{ animationDelay: "200ms" }} />
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] pulse-dot" style={{ animationDelay: "400ms" }} />
-      </span>
-      Searching passages and drafting an answer…
+      {isEmpty ? (
+        <div className="flex items-center gap-3 text-sm text-[var(--muted)] py-1">
+          <span className="flex gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] pulse-dot" style={{ animationDelay: "0ms" }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] pulse-dot" style={{ animationDelay: "200ms" }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] pulse-dot" style={{ animationDelay: "400ms" }} />
+          </span>
+          {chunks.length > 0
+            ? "Drafting answer from the retrieved passages…"
+            : "Searching passages…"}
+        </div>
+      ) : (
+        <CitedAnswer answer={answer} chunks={chunks} />
+      )}
     </div>
   );
 }

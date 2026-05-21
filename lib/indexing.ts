@@ -3,12 +3,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { parsePdf } from "@/lib/pdf";
 import { chunkPages } from "@/lib/chunking";
 import { embed } from "@/lib/embeddings";
+import { summarizeDocument } from "@/lib/summarize";
 
 export type IndexResult = {
   documentId: string;
   title: string;
   pageCount: number;
   chunkCount: number;
+  summary?: string;
+  suggestedQuestions?: string[];
 };
 
 /**
@@ -40,6 +43,13 @@ export async function indexPdf(
     vectors.push(...v);
   }
 
+  // Run summarization in parallel with chunk inserts — Claude is the slowest
+  // part by far, so kicking it off here keeps the upload latency low.
+  const insightsPromise = summarizeDocument(pages).catch(() => ({
+    summary: "",
+    suggestedQuestions: [],
+  }));
+
   const admin = createAdminClient();
 
   const { data: doc, error: docErr } = await admin
@@ -66,10 +76,28 @@ export async function indexPdf(
     }
   }
 
+  // Await the summary, then persist alongside the document so reads pick
+  // it up via GET /api/documents.
+  const insights = await insightsPromise;
+  if (insights.summary || insights.suggestedQuestions.length > 0) {
+    await admin
+      .from("documents")
+      .update({
+        summary: insights.summary || null,
+        suggested_questions:
+          insights.suggestedQuestions.length > 0
+            ? insights.suggestedQuestions
+            : null,
+      })
+      .eq("id", doc.id);
+  }
+
   return {
     documentId: doc.id as string,
     title,
     pageCount,
     chunkCount: chunks.length,
+    summary: insights.summary,
+    suggestedQuestions: insights.suggestedQuestions,
   };
 }

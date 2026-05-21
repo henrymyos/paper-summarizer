@@ -12,7 +12,7 @@ export async function GET() {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("documents")
-    .select("id, title, page_count, created_at")
+    .select("id, title, page_count, summary, suggested_questions, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 

@@ -2,6 +2,8 @@ export type DocumentRow = {
   id: string;
   title: string;
   page_count: number | null;
+  summary: string | null;
+  suggested_questions: string[] | null;
   created_at: string;
 };
 

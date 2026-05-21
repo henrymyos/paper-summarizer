@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ApiChunk } from "@/lib/api/types";
+import { MarkdownAnswer } from "@/components/markdown-answer";
 
 type Props = {
   answer: string;
@@ -11,18 +12,13 @@ type Props = {
 export function CitedAnswer({ answer, chunks }: Props) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
-  const parts = renderWithCitations(answer, (idx) => (
-    <CitationPill
-      key={`c-${idx}`}
-      n={idx}
-      onClick={() => setOpenIdx(openIdx === idx ? null : idx)}
-    />
-  ));
-
   return (
     <div className="space-y-4">
-      <div className="prose-invert text-sm leading-relaxed text-zinc-100 whitespace-pre-wrap">
-        {parts}
+      <div className="text-sm leading-relaxed">
+        <MarkdownAnswer
+          text={answer}
+          onCitationClick={(n) => setOpenIdx(openIdx === n ? null : n)}
+        />
       </div>
 
       {chunks.length > 0 && (
@@ -69,46 +65,4 @@ export function CitedAnswer({ answer, chunks }: Props) {
       )}
     </div>
   );
-}
-
-function CitationPill({ n, onClick }: { n: number; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="inline-flex items-center justify-center align-baseline mx-0.5 px-1.5 py-0.5 text-[10px] font-mono
-                 rounded-md bg-[var(--accent)]/15 text-[var(--accent)] hover:bg-[var(--accent)]/25 transition-colors"
-      aria-label={`Source ${n}`}
-    >
-      {n}
-    </button>
-  );
-}
-
-/**
- * Split a string like "Foo [1] bar [2,3] baz." into nodes where each [n] (or
- * [n,m]) becomes one or more clickable pills. Anything else is left as text.
- * Also strips the brackets so the answer reads cleanly.
- */
-function renderWithCitations(
-  text: string,
-  renderPill: (n: number) => React.ReactNode,
-): React.ReactNode[] {
-  const out: React.ReactNode[] = [];
-  const re = /\[(\d+(?:\s*,\s*\d+)*)\]/g;
-  let last = 0;
-  let m: RegExpExecArray | null;
-  let key = 0;
-
-  while ((m = re.exec(text)) !== null) {
-    if (m.index > last) {
-      out.push(<span key={`t-${key++}`}>{text.slice(last, m.index)}</span>);
-    }
-    const nums = m[1].split(",").map((s) => parseInt(s.trim(), 10));
-    nums.forEach((n) => out.push(renderPill(n)));
-    last = m.index + m[0].length;
-  }
-  if (last < text.length) {
-    out.push(<span key={`t-${key++}`}>{text.slice(last)}</span>);
-  }
-  return out;
 }

@@ -8,12 +8,14 @@ create extension if not exists vector;
 
 -- Each uploaded PDF.
 create table if not exists documents (
-  id          uuid primary key default gen_random_uuid(),
-  user_id     uuid references auth.users(id) on delete cascade not null,
-  title       text not null,
-  page_count  int,
-  storage_path text,
-  created_at  timestamptz default now()
+  id                   uuid primary key default gen_random_uuid(),
+  user_id              uuid references auth.users(id) on delete cascade not null,
+  title                text not null,
+  page_count           int,
+  storage_path         text,
+  summary              text,
+  suggested_questions  text[],
+  created_at           timestamptz default now()
 );
 
 -- Text chunks extracted from each document.
