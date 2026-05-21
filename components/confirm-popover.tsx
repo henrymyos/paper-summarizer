@@ -65,13 +65,9 @@ export function ConfirmPopover({
 
   if (!open || !mounted || !anchor) return null;
 
-  // Keep the popover on screen vertically.
-  const margin = 8;
-  const cardHeight = 200; // approximate; just used to nudge upward if needed
-  const top = Math.min(
-    Math.max(margin, anchor.top),
-    typeof window !== "undefined" ? window.innerHeight - cardHeight - margin : anchor.top,
-  );
+  // Align the popover with the clicked row. Only clamp to keep a small
+  // top margin if the row would otherwise overflow off the top edge.
+  const top = Math.max(8, anchor.top);
 
   const popover = (
     <div
