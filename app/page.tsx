@@ -28,7 +28,10 @@ export default function Home() {
         documents={documents}
         activeDocumentId={activeId}
         onSelect={setActiveId}
-        onUploaded={refresh}
+        onUploaded={async (newDocumentId) => {
+          await refresh();
+          if (newDocumentId) setActiveId(newDocumentId);
+        }}
         onDeleted={refresh}
       />
       <Chat activeDocument={active} documents={documents} />

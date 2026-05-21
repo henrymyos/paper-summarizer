@@ -8,7 +8,7 @@ type Props = {
   documents: DocumentRow[];
   activeDocumentId: string | null;
   onSelect: (id: string | null) => void;
-  onUploaded: () => void;
+  onUploaded: (newDocumentId?: string) => void;
   onDeleted: () => void;
 };
 
@@ -34,11 +34,11 @@ export function Sidebar({
 
     try {
       const res = await fetch("/api/documents", { method: "POST", body: form });
+      const body = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? `Upload failed (${res.status})`);
       }
-      onUploaded();
+      onUploaded(typeof body.documentId === "string" ? body.documentId : undefined);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed.");
     } finally {
