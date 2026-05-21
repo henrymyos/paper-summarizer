@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 type Props = {
   open: boolean;
@@ -24,10 +25,13 @@ export function ConfirmDialog({
   onCancel,
 }: Props) {
   const confirmRef = useRef<HTMLButtonElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Portals need a DOM target; mount only after first client render.
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
-    // Focus the confirm button so Enter triggers it.
     confirmRef.current?.focus();
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onCancel();
@@ -36,9 +40,9 @@ export function ConfirmDialog({
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onCancel]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  const dialog = (
     <div
       role="dialog"
       aria-modal="true"
@@ -92,4 +96,6 @@ export function ConfirmDialog({
       </div>
     </div>
   );
+
+  return createPortal(dialog, document.body);
 }
