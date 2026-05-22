@@ -6,7 +6,7 @@ import { getUserId } from "@/lib/user";
 export const runtime = "nodejs";
 
 export async function GET() {
-  const userId = getUserId();
+  const userId = await getUserId();
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("annotations")
@@ -27,7 +27,7 @@ const Body = z.object({
 });
 
 export async function POST(req: Request) {
-  const userId = getUserId();
+  const userId = await getUserId();
   const raw = await req.json().catch(() => null);
   const parsed = Body.safeParse(raw);
   if (!parsed.success) {

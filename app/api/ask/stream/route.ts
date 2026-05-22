@@ -16,7 +16,7 @@ const Body = z.object({
 });
 
 export async function POST(req: Request) {
-  const userId = getUserId();
+  const userId = await getUserId();
   const raw = await req.json().catch(() => null);
   const parsed = Body.safeParse(raw);
   if (!parsed.success) {

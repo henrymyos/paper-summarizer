@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function GET() {
-  const userId = getUserId();
+  const userId = await getUserId();
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("documents")
@@ -23,7 +23,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const userId = getUserId();
+  const userId = await getUserId();
   const form = await req.formData();
   const file = form.get("file");
 

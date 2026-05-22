@@ -4,21 +4,30 @@ import { useCallback, useEffect, useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Chat } from "@/components/chat";
 import { SavedPassages } from "@/components/saved-passages";
+import { ToastProvider, useToast } from "@/components/toast";
 import type { Annotation, ApiChunk, DocumentRow } from "@/lib/api/types";
 
 type View = "chat" | "saved";
 
-export default function Home() {
+function PageInner() {
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [view, setView] = useState<View>("chat");
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toast = useToast();
 
   const refreshDocs = useCallback(async () => {
+    setLoadingDocuments(true);
     const res = await fetch("/api/documents", { cache: "no-store" });
-    if (!res.ok) return;
+    if (!res.ok) {
+      setLoadingDocuments(false);
+      return;
+    }
     const { documents } = (await res.json()) as { documents: DocumentRow[] };
     setDocuments(documents);
+    setLoadingDocuments(false);
   }, []);
 
   const refreshAnnotations = useCallback(async () => {
@@ -41,12 +50,13 @@ export default function Home() {
   );
 
   async function toggleSave(chunk: ApiChunk) {
-    // Find an existing annotation with this chunk_id.
     const existing = annotations.find((a) => a.chunk_id === chunk.id);
     if (existing) {
-      // Optimistic remove.
       setAnnotations((m) => m.filter((a) => a.id !== existing.id));
-      await fetch(`/api/annotations/${existing.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/annotations/${existing.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) toast.error("Couldn't remove from saved.");
       return;
     }
     const res = await fetch("/api/annotations", {
@@ -62,12 +72,16 @@ export default function Home() {
     if (res.ok) {
       const { annotation } = (await res.json()) as { annotation: Annotation };
       setAnnotations((m) => [annotation, ...m]);
+      toast.success("Passage saved");
+    } else {
+      toast.error("Couldn't save passage.");
     }
   }
 
   function jumpToDocument(id: string) {
     setView("chat");
     setActiveId(id);
+    setSidebarOpen(false);
   }
 
   return (
@@ -77,16 +91,25 @@ export default function Home() {
         activeDocumentId={view === "chat" ? activeId : null}
         view={view}
         annotationCount={annotations.length}
+        loadingDocuments={loadingDocuments}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
         onSelect={(id) => {
           setView("chat");
           setActiveId(id);
+          setSidebarOpen(false);
         }}
-        onSelectSaved={() => setView("saved")}
+        onSelectSaved={() => {
+          setView("saved");
+          setSidebarOpen(false);
+        }}
         onUploaded={async (newDocumentId) => {
           await refreshDocs();
           if (newDocumentId) {
             setView("chat");
             setActiveId(newDocumentId);
+            setSidebarOpen(false);
+            toast.success("Document indexed");
           }
         }}
         onDeleted={async () => {
@@ -98,6 +121,7 @@ export default function Home() {
         <SavedPassages
           documents={documents}
           onJumpToDocument={jumpToDocument}
+          onOpenSidebar={() => setSidebarOpen(true)}
         />
       ) : (
         <Chat
@@ -106,8 +130,17 @@ export default function Home() {
           savedChunkIds={savedChunkIds}
           onToggleSave={toggleSave}
           onJumpToDocument={jumpToDocument}
+          onOpenSidebar={() => setSidebarOpen(true)}
         />
       )}
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <ToastProvider>
+      <PageInner />
+    </ToastProvider>
   );
 }

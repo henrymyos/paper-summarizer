@@ -14,7 +14,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const userId = getUserId();
+  const userId = await getUserId();
   const raw = await req.json().catch(() => null);
   const parsed = Patch.safeParse(raw);
   if (!parsed.success) {
@@ -35,7 +35,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const userId = getUserId();
+  const userId = await getUserId();
   const admin = createAdminClient();
   const { error } = await admin
     .from("annotations")

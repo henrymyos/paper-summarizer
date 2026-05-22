@@ -1,10 +1,18 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { DocumentRow } from "@/lib/api/types";
-import { FileIcon, SparkleIcon, TrashIcon, UploadIcon } from "@/components/icons";
+import {
+  CloseIcon,
+  FileIcon,
+  SearchIcon,
+  SparkleIcon,
+  TrashIcon,
+  UploadIcon,
+} from "@/components/icons";
 import { BookmarkIcon } from "@/components/icons-extra";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { useToast } from "@/components/toast";
 
 type Props = {
   documents: DocumentRow[];
@@ -15,6 +23,9 @@ type Props = {
   onSelectSaved: () => void;
   onUploaded: (newDocumentId?: string) => void;
   onDeleted: () => void;
+  open: boolean;
+  onClose: () => void;
+  loadingDocuments: boolean;
 };
 
 export function Sidebar({
@@ -26,18 +37,40 @@ export function Sidebar({
   onSelectSaved,
   onUploaded,
   onDeleted,
+  open,
+  onClose,
+  loadingDocuments,
 }: Props) {
+  const [filter, setFilter] = useState("");
+  const filterRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        filterRef.current?.focus();
+        filterRef.current?.select();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  const visibleDocs = filter.trim()
+    ? documents.filter((d) =>
+        d.title.toLowerCase().includes(filter.trim().toLowerCase()),
+      )
+    : documents;
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadName, setUploadName] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{
     id: string;
     title: string;
   } | null>(null);
+  const toast = useToast();
 
   async function handleFile(file: File) {
-    setError(null);
     setUploading(true);
     setUploadName(file.name);
 
@@ -52,7 +85,7 @@ export function Sidebar({
       }
       onUploaded(typeof body.documentId === "string" ? body.documentId : undefined);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload failed.");
+      toast.error(e instanceof Error ? e.message : "Upload failed.");
     } finally {
       setUploading(false);
       setUploadName(null);
@@ -72,19 +105,41 @@ export function Sidebar({
   }
 
   return (
-    <aside className="w-72 shrink-0 border-r border-[var(--border)] bg-zinc-950/60 backdrop-blur-sm flex flex-col">
-      <div className="px-5 py-5 border-b border-[var(--border)] bg-gradient-to-b from-[var(--accent)]/[0.08] to-transparent">
-        <div className="flex items-center gap-2">
-          <div className="relative flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--accent)]/15 border border-[var(--accent)]/30 shadow-[0_0_18px_rgba(96,165,250,0.35)]">
-            <SparkleIcon className="w-4 h-4 text-[var(--accent)]" />
+    <>
+      {/* Mobile backdrop */}
+      <div
+        className={`fixed inset-0 bg-black/55 backdrop-blur-sm z-30 md:hidden transition-opacity ${
+          open ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={onClose}
+      />
+      <aside
+        className={`fixed md:static inset-y-0 left-0 z-40 w-72 shrink-0 border-r border-[var(--border)]
+                    bg-zinc-950/95 md:bg-zinc-950/60 backdrop-blur-sm flex flex-col
+                    transition-transform duration-200 ease-out
+                    ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
+      >
+      <div className="px-5 py-5 border-b border-[var(--border)] bg-gradient-to-b from-[var(--accent)]/[0.08] to-transparent flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <div className="relative flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--accent)]/15 border border-[var(--accent)]/30 shadow-[0_0_18px_rgba(96,165,250,0.35)]">
+              <SparkleIcon className="w-4 h-4 text-[var(--accent)]" />
+            </div>
+            <h1 className="text-base font-semibold tracking-tight">
+              Paper Summarizer
+            </h1>
           </div>
-          <h1 className="text-base font-semibold tracking-tight">
-            Paper Summarizer
-          </h1>
+          <p className="mt-2 text-xs text-[var(--muted)]">
+            Ask your PDFs. Get cited answers.
+          </p>
         </div>
-        <p className="mt-2 text-xs text-[var(--muted)]">
-          Ask your PDFs. Get cited answers.
-        </p>
+        <button
+          onClick={onClose}
+          className="md:hidden text-[var(--muted)] hover:text-zinc-100 -mt-1"
+          aria-label="Close sidebar"
+        >
+          <CloseIcon className="w-5 h-5" />
+        </button>
       </div>
 
       <div className="px-3 py-3 border-b border-[var(--border)]">
@@ -114,9 +169,6 @@ export function Sidebar({
             <span className="pulse-dot">●</span> Processing {uploadName}…
           </p>
         )}
-        {error && (
-          <p className="mt-2 text-xs text-red-400 break-words">{error}</p>
-        )}
       </div>
 
       <div className="flex-1 overflow-y-auto px-2 py-2">
@@ -131,18 +183,41 @@ export function Sidebar({
           count={annotationCount}
           onClick={onSelectSaved}
         />
-        <div className="px-3 mt-3 mb-1 text-[10px] uppercase tracking-wider text-[var(--muted)]">
-          Library
+        <div className="flex items-center justify-between px-3 mt-3 mb-1">
+          <span className="text-[10px] uppercase tracking-wider text-[var(--muted)]">
+            Library
+          </span>
+          <kbd className="hidden md:inline text-[10px] text-[var(--muted)] font-mono border border-[var(--border)] rounded px-1 py-0.5">
+            ⌘K
+          </kbd>
         </div>
-        {documents.length === 0 ? (
+        <div className="relative px-1 mb-1">
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--muted)]" />
+          <input
+            ref={filterRef}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Filter library…"
+            className="w-full bg-zinc-900/50 border border-[var(--border)] rounded-md pl-8 pr-2 py-1.5 text-xs
+                       text-zinc-200 placeholder:text-zinc-600 outline-none
+                       focus:border-[var(--accent)]/50 focus:bg-zinc-900/80 transition-colors"
+          />
+        </div>
+        {loadingDocuments && documents.length === 0 ? (
+          <DocSkeleton />
+        ) : documents.length === 0 ? (
           <p className="px-3 py-2 text-xs text-[var(--muted)]">
             No documents yet. Upload one to start.
           </p>
+        ) : visibleDocs.length === 0 ? (
+          <p className="px-3 py-2 text-xs text-[var(--muted)]">
+            No documents match &ldquo;{filter}&rdquo;.
+          </p>
         ) : (
-          documents.map((doc) => (
+          visibleDocs.map((doc) => (
             <DocItem
               key={doc.id}
-              active={activeDocumentId === doc.id}
+              active={view === "chat" && activeDocumentId === doc.id}
               onClick={() => onSelect(doc.id)}
               title={doc.title}
               subtitle={`${doc.page_count ?? "?"} pages · ${formatRelative(doc.created_at)}`}
@@ -173,6 +248,26 @@ export function Sidebar({
         onCancel={() => setPendingDelete(null)}
       />
     </aside>
+    </>
+  );
+}
+
+function DocSkeleton() {
+  return (
+    <div className="space-y-1 px-1 py-2">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-2 px-2 py-2 rounded-md animate-pulse"
+        >
+          <div className="w-4 h-4 rounded bg-zinc-800/80 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <div className="h-3 bg-zinc-800/80 rounded w-3/4" />
+            <div className="mt-1.5 h-2 bg-zinc-800/60 rounded w-1/2" />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 

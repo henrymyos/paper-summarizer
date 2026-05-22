@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { ApiChunk, ChatMessage, DocumentRow } from "@/lib/api/types";
 import { CitedAnswer } from "@/components/cited-answer";
-import { SendIcon, SparkleIcon } from "@/components/icons";
+import { MenuIcon, SendIcon, SparkleIcon } from "@/components/icons";
 import { BookIcon, LayersIcon, MessageIcon } from "@/components/icons-extra";
+import { useToast } from "@/components/toast";
 import { StructureView } from "@/components/structure-view";
 import { ReferencesView } from "@/components/references-view";
 
@@ -16,6 +17,7 @@ type Props = {
   savedChunkIds: Set<number>;
   onToggleSave: (chunk: ApiChunk) => void;
   onJumpToDocument: (id: string) => void;
+  onOpenSidebar: () => void;
 };
 
 export function Chat({
@@ -24,8 +26,10 @@ export function Chat({
   savedChunkIds,
   onToggleSave,
   onJumpToDocument,
+  onOpenSidebar,
 }: Props) {
   const [tab, setTab] = useState<Tab>("chat");
+  const toast = useToast();
   useEffect(() => {
     // Reset to chat whenever the active document changes.
     setTab("chat");
@@ -128,6 +132,32 @@ export function Chat({
       let buffer = "";
       let streamErr: string | null = null;
 
+      // Batch token deltas with rAF so we don't re-render the markdown
+      // tree for every single byte that arrives.
+      let pending = "";
+      let scheduled = false;
+      const flush = () => {
+        if (!pending) {
+          scheduled = false;
+          return;
+        }
+        const t = pending;
+        pending = "";
+        scheduled = false;
+        setMessages((m) =>
+          m.map((msg) =>
+            msg.id === assistantId && msg.role === "assistant"
+              ? { ...msg, answer: msg.answer + t }
+              : msg,
+          ),
+        );
+      };
+      const schedule = () => {
+        if (scheduled) return;
+        scheduled = true;
+        requestAnimationFrame(flush);
+      };
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -164,25 +194,23 @@ export function Chat({
               ),
             );
           } else if (parsed.type === "token" && parsed.text) {
-            const t = parsed.text;
-            setMessages((m) =>
-              m.map((msg) =>
-                msg.id === assistantId && msg.role === "assistant"
-                  ? { ...msg, answer: msg.answer + t }
-                  : msg,
-              ),
-            );
+            pending += parsed.text;
+            schedule();
           } else if (parsed.type === "error") {
             streamErr = parsed.message ?? "Ask failed.";
           }
         }
       }
 
+      // Drain any pending tokens that hadn't flushed yet.
+      if (pending) flush();
+
       if (streamErr) throw new Error(streamErr);
     } catch (e) {
-      // Drop the empty assistant placeholder so the error stands alone.
       setMessages((m) => m.filter((msg) => msg.id !== assistantId));
-      setError(e instanceof Error ? e.message : "Ask failed.");
+      const message = e instanceof Error ? e.message : "Ask failed.";
+      setError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }
@@ -192,8 +220,15 @@ export function Chat({
 
   return (
     <section className="flex-1 flex flex-col min-w-0">
-      <header className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between gap-4">
-        <div className="min-w-0">
+      <header className="px-4 md:px-6 py-4 border-b border-[var(--border)] flex items-center justify-between gap-3">
+        <button
+          onClick={onOpenSidebar}
+          className="md:hidden -ml-1 p-1.5 text-[var(--muted)] hover:text-zinc-100 rounded-md"
+          aria-label="Open sidebar"
+        >
+          <MenuIcon className="w-5 h-5" />
+        </button>
+        <div className="min-w-0 flex-1">
           <h2 className="text-sm font-medium truncate">
             {activeDocument ? activeDocument.title : "All documents"}
           </h2>
@@ -234,7 +269,7 @@ export function Chat({
         )}
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-6 py-6">
         {tab === "structure" && activeDocument ? (
           <StructureView document={activeDocument} />
         ) : tab === "references" && activeDocument ? (

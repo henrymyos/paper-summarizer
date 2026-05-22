@@ -3,14 +3,19 @@
 import { useEffect, useState, useCallback } from "react";
 import type { Annotation, DocumentRow } from "@/lib/api/types";
 import { BookmarkIcon } from "@/components/icons-extra";
-import { TrashIcon } from "@/components/icons";
+import { MenuIcon, TrashIcon } from "@/components/icons";
 
 type Props = {
   documents: DocumentRow[];
   onJumpToDocument: (id: string) => void;
+  onOpenSidebar: () => void;
 };
 
-export function SavedPassages({ documents, onJumpToDocument }: Props) {
+export function SavedPassages({
+  documents,
+  onJumpToDocument,
+  onOpenSidebar,
+}: Props) {
   const [items, setItems] = useState<Annotation[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,19 +51,28 @@ export function SavedPassages({ documents, onJumpToDocument }: Props) {
 
   return (
     <section className="flex-1 flex flex-col min-w-0">
-      <header className="px-6 py-4 border-b border-[var(--border)]">
-        <h2 className="text-sm font-medium flex items-center gap-2">
-          <BookmarkIcon className="w-4 h-4 text-[var(--accent)]" filled />
-          Saved passages
-        </h2>
-        <p className="text-[11px] text-[var(--muted)] mt-0.5">
-          {loading
-            ? "Loading…"
-            : `${items.length} saved · click a row to jump to its document`}
-        </p>
+      <header className="px-4 md:px-6 py-4 border-b border-[var(--border)] flex items-center gap-3">
+        <button
+          onClick={onOpenSidebar}
+          className="md:hidden -ml-1 p-1.5 text-[var(--muted)] hover:text-zinc-100 rounded-md"
+          aria-label="Open sidebar"
+        >
+          <MenuIcon className="w-5 h-5" />
+        </button>
+        <div>
+          <h2 className="text-sm font-medium flex items-center gap-2">
+            <BookmarkIcon className="w-4 h-4 text-[var(--accent)]" filled />
+            Saved passages
+          </h2>
+          <p className="text-[11px] text-[var(--muted)] mt-0.5">
+            {loading
+              ? "Loading…"
+              : `${items.length} saved · click a row to jump to its document`}
+          </p>
+        </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6">
         {!loading && items.length === 0 && (
           <div className="max-w-xl mx-auto text-center text-sm text-[var(--muted)] py-16">
             <BookmarkIcon className="mx-auto w-8 h-8 text-[var(--accent)]/40 mb-3" />

@@ -21,7 +21,7 @@ type ChunkRow = {
 };
 
 export async function GET(req: Request) {
-  const userId = getUserId();
+  const userId = await getUserId();
   const url = new URL(req.url);
   const documentId = url.searchParams.get("documentId");
 
