@@ -4,13 +4,33 @@ import { useEffect, useRef, useState } from "react";
 import type { ApiChunk, ChatMessage, DocumentRow } from "@/lib/api/types";
 import { CitedAnswer } from "@/components/cited-answer";
 import { SendIcon, SparkleIcon } from "@/components/icons";
+import { BookIcon, LayersIcon, MessageIcon } from "@/components/icons-extra";
+import { StructureView } from "@/components/structure-view";
+import { ReferencesView } from "@/components/references-view";
+
+type Tab = "chat" | "structure" | "references";
 
 type Props = {
   activeDocument: DocumentRow | null;
   documents: DocumentRow[];
+  savedChunkIds: Set<number>;
+  onToggleSave: (chunk: ApiChunk) => void;
+  onJumpToDocument: (id: string) => void;
 };
 
-export function Chat({ activeDocument, documents }: Props) {
+export function Chat({
+  activeDocument,
+  documents,
+  savedChunkIds,
+  onToggleSave,
+  onJumpToDocument,
+}: Props) {
+  const [tab, setTab] = useState<Tab>("chat");
+  useEffect(() => {
+    // Reset to chat whenever the active document changes.
+    setTab("chat");
+  }, [activeDocument?.id]);
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [question, setQuestion] = useState("");
   const [busy, setBusy] = useState(false);
@@ -172,7 +192,7 @@ export function Chat({ activeDocument, documents }: Props) {
 
   return (
     <section className="flex-1 flex flex-col min-w-0">
-      <header className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
+      <header className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-sm font-medium truncate">
             {activeDocument ? activeDocument.title : "All documents"}
@@ -183,10 +203,47 @@ export function Chat({ activeDocument, documents }: Props) {
               : `Asking across ${documents.length} document${documents.length === 1 ? "" : "s"}`}
           </p>
         </div>
+        {activeDocument && (
+          <nav className="flex items-center gap-1 rounded-lg border border-[var(--border)] bg-zinc-900/50 p-0.5">
+            <TabButton
+              icon={<MessageIcon className="w-3.5 h-3.5" />}
+              label="Chat"
+              active={tab === "chat"}
+              onClick={() => setTab("chat")}
+            />
+            {(activeDocument.structure?.sections?.length ?? 0) +
+              (activeDocument.structure?.figures?.length ?? 0) +
+              (activeDocument.structure?.tables?.length ?? 0) >
+              0 && (
+              <TabButton
+                icon={<LayersIcon className="w-3.5 h-3.5" />}
+                label="Structure"
+                active={tab === "structure"}
+                onClick={() => setTab("structure")}
+              />
+            )}
+            {(activeDocument.references?.length ?? 0) > 0 && (
+              <TabButton
+                icon={<BookIcon className="w-3.5 h-3.5" />}
+                label="References"
+                active={tab === "references"}
+                onClick={() => setTab("references")}
+              />
+            )}
+          </nav>
+        )}
       </header>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6">
-        {messages.length === 0 ? (
+        {tab === "structure" && activeDocument ? (
+          <StructureView document={activeDocument} />
+        ) : tab === "references" && activeDocument ? (
+          <ReferencesView
+            document={activeDocument}
+            library={documents}
+            onJumpToDocument={onJumpToDocument}
+          />
+        ) : messages.length === 0 ? (
           <EmptyState
             hasDocuments={hasDocuments}
             activeDocument={activeDocument}
@@ -206,7 +263,12 @@ export function Chat({ activeDocument, documents }: Props) {
                 </li>
               ) : (
                 <li key={m.id}>
-                  <AnswerCard answer={m.answer} chunks={m.chunks} />
+                  <AnswerCard
+                    answer={m.answer}
+                    chunks={m.chunks}
+                    savedChunkIds={savedChunkIds}
+                    onToggleSave={onToggleSave}
+                  />
                 </li>
               ),
             )}
@@ -221,6 +283,7 @@ export function Chat({ activeDocument, documents }: Props) {
         )}
       </div>
 
+      {tab === "chat" && (
       <div className="border-t border-[var(--border)] px-4 py-3">
         <form
           onSubmit={(e) => {
@@ -264,7 +327,34 @@ export function Chat({ activeDocument, documents }: Props) {
           Answers are grounded in the retrieved passages. Click a citation to see the source.
         </p>
       </div>
+      )}
     </section>
+  );
+}
+
+function TabButton({
+  icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+        active
+          ? "bg-[var(--accent)]/15 text-[var(--accent)]"
+          : "text-zinc-400 hover:text-zinc-100"
+      }`}
+    >
+      {icon}
+      {label}
+    </button>
   );
 }
 
@@ -351,7 +441,17 @@ function EmptyState({
   );
 }
 
-function AnswerCard({ answer, chunks }: { answer: string; chunks: ApiChunk[] }) {
+function AnswerCard({
+  answer,
+  chunks,
+  savedChunkIds,
+  onToggleSave,
+}: {
+  answer: string;
+  chunks: ApiChunk[];
+  savedChunkIds: Set<number>;
+  onToggleSave: (chunk: ApiChunk) => void;
+}) {
   const isEmpty = answer.length === 0;
   return (
     <div className="relative rounded-2xl border border-[var(--border)] bg-zinc-900/40 px-5 py-4 overflow-hidden">
@@ -368,7 +468,12 @@ function AnswerCard({ answer, chunks }: { answer: string; chunks: ApiChunk[] }) 
             : "Searching passages…"}
         </div>
       ) : (
-        <CitedAnswer answer={answer} chunks={chunks} />
+        <CitedAnswer
+          answer={answer}
+          chunks={chunks}
+          savedChunkIds={savedChunkIds}
+          onToggleSave={onToggleSave}
+        />
       )}
     </div>
   );

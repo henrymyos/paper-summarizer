@@ -3,13 +3,21 @@
 import { useState } from "react";
 import type { ApiChunk } from "@/lib/api/types";
 import { MarkdownAnswer } from "@/components/markdown-answer";
+import { BookmarkIcon } from "@/components/icons-extra";
 
 type Props = {
   answer: string;
   chunks: ApiChunk[];
+  savedChunkIds: Set<number>;
+  onToggleSave: (chunk: ApiChunk) => void;
 };
 
-export function CitedAnswer({ answer, chunks }: Props) {
+export function CitedAnswer({
+  answer,
+  chunks,
+  savedChunkIds,
+  onToggleSave,
+}: Props) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   return (
@@ -29,6 +37,7 @@ export function CitedAnswer({ answer, chunks }: Props) {
           <ol className="space-y-2">
             {chunks.map((c, i) => {
               const isOpen = openIdx === i + 1;
+              const isSaved = savedChunkIds.has(c.id);
               return (
                 <li
                   key={c.id}
@@ -38,20 +47,34 @@ export function CitedAnswer({ answer, chunks }: Props) {
                       : "border-[var(--border)] bg-zinc-900/40"
                   }`}
                 >
-                  <button
-                    onClick={() => setOpenIdx(isOpen ? null : i + 1)}
-                    className="w-full flex items-start gap-3 px-3 py-2 text-left"
-                  >
-                    <span className="mt-0.5 font-mono text-[10px] text-[var(--accent)]">
-                      [{i + 1}]
-                    </span>
-                    <span className="flex-1 text-[var(--muted)]">
-                      page {c.page_number ?? "?"}
-                      {c.similarity !== null && (
-                        <> · similarity {c.similarity.toFixed(2)}</>
-                      )}
-                    </span>
-                  </button>
+                  <div className="flex items-start gap-2">
+                    <button
+                      onClick={() => setOpenIdx(isOpen ? null : i + 1)}
+                      className="flex-1 flex items-start gap-3 px-3 py-2 text-left"
+                    >
+                      <span className="mt-0.5 font-mono text-[10px] text-[var(--accent)]">
+                        [{i + 1}]
+                      </span>
+                      <span className="flex-1 text-[var(--muted)]">
+                        page {c.page_number ?? "?"}
+                        {c.similarity !== null && (
+                          <> · similarity {c.similarity.toFixed(2)}</>
+                        )}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => onToggleSave(c)}
+                      className={`px-2 py-2 transition-colors ${
+                        isSaved
+                          ? "text-[var(--accent)]"
+                          : "text-[var(--muted)] hover:text-zinc-200"
+                      }`}
+                      aria-label={isSaved ? "Remove from saved" : "Save passage"}
+                      title={isSaved ? "Remove from saved" : "Save passage"}
+                    >
+                      <BookmarkIcon className="w-3.5 h-3.5" filled={isSaved} />
+                    </button>
+                  </div>
                   {isOpen && (
                     <div className="px-3 pb-3 -mt-1 text-zinc-300 leading-relaxed whitespace-pre-wrap">
                       {c.text}

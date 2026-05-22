@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { embed } from "@/lib/embeddings";
+import { rerank } from "@/lib/rerank";
 import { streamAnswer } from "@/lib/answer-stream";
 import type { RetrievedChunk } from "@/lib/answer";
 import { getUserId } from "@/lib/user";
@@ -35,17 +36,37 @@ export async function POST(req: Request) {
       };
 
       try {
-        // Embed the question + retrieve top-k chunks.
+        // Two-stage retrieval: pull a wider candidate set from pgvector
+        // (cheap cosine similarity) then rerank with Voyage's cross-encoder
+        // to get a sharper top-k. Falls back to similarity ordering if the
+        // rerank call fails so we never block the user.
+        const finalK = k ?? 5;
+        const candidateK = Math.max(20, finalK * 4);
+
         const [qVec] = await embed([question], "query");
         const admin = createAdminClient();
         const { data, error } = await admin.rpc("match_chunks", {
           query_embedding: qVec as unknown as string,
-          match_count: k ?? 5,
+          match_count: candidateK,
           filter_document_id: documentId ?? null,
         });
         if (error) throw error;
 
-        const chunks = (data ?? []) as RetrievedChunk[];
+        const candidates = (data ?? []) as RetrievedChunk[];
+        let chunks: RetrievedChunk[];
+        if (candidates.length <= finalK) {
+          chunks = candidates;
+        } else {
+          try {
+            const reranked = await rerank(question, candidates, finalK);
+            // Preserve original RetrievedChunk fields; drop the rerank
+            // score before sending to the client.
+            chunks = reranked.map(({ rerankScore: _rs, ...rest }) => rest);
+          } catch {
+            chunks = candidates.slice(0, finalK);
+          }
+        }
+
         send({ type: "chunks", chunks });
 
         if (chunks.length === 0) {

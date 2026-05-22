@@ -3,12 +3,16 @@
 import { useRef, useState } from "react";
 import type { DocumentRow } from "@/lib/api/types";
 import { FileIcon, SparkleIcon, TrashIcon, UploadIcon } from "@/components/icons";
+import { BookmarkIcon } from "@/components/icons-extra";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
 type Props = {
   documents: DocumentRow[];
   activeDocumentId: string | null;
+  view: "chat" | "saved";
+  annotationCount: number;
   onSelect: (id: string | null) => void;
+  onSelectSaved: () => void;
   onUploaded: (newDocumentId?: string) => void;
   onDeleted: () => void;
 };
@@ -16,7 +20,10 @@ type Props = {
 export function Sidebar({
   documents,
   activeDocumentId,
+  view,
+  annotationCount,
   onSelect,
+  onSelectSaved,
   onUploaded,
   onDeleted,
 }: Props) {
@@ -114,10 +121,15 @@ export function Sidebar({
 
       <div className="flex-1 overflow-y-auto px-2 py-2">
         <DocItem
-          active={activeDocumentId === null}
+          active={view === "chat" && activeDocumentId === null}
           onClick={() => onSelect(null)}
           title="All documents"
           subtitle={`${documents.length} indexed`}
+        />
+        <SavedItem
+          active={view === "saved"}
+          count={annotationCount}
+          onClick={onSelectSaved}
         />
         <div className="px-3 mt-3 mb-1 text-[10px] uppercase tracking-wider text-[var(--muted)]">
           Library
@@ -209,6 +221,44 @@ function DocItem({
           <TrashIcon className="w-3.5 h-3.5" />
         </button>
       )}
+    </div>
+  );
+}
+
+function SavedItem({
+  active,
+  count,
+  onClick,
+}: {
+  active: boolean;
+  count: number;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      className={`group relative flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer transition-colors mt-1
+                  ${
+                    active
+                      ? "bg-[var(--accent)]/12 ring-1 ring-inset ring-[var(--accent)]/30"
+                      : "hover:bg-zinc-900/60"
+                  }`}
+      onClick={onClick}
+    >
+      {active && (
+        <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-[var(--accent)]" />
+      )}
+      <BookmarkIcon
+        className={`w-4 h-4 shrink-0 ${
+          active ? "text-[var(--accent)]" : "text-[var(--muted)]"
+        }`}
+        filled={active}
+      />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium">Saved passages</p>
+        <p className="text-[11px] text-[var(--muted)]">
+          {count} saved
+        </p>
+      </div>
     </div>
   );
 }

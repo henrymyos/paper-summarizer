@@ -12,6 +12,12 @@ export type IndexResult = {
   chunkCount: number;
   summary?: string;
   suggestedQuestions?: string[];
+  structure?: {
+    sections: { title: string; page?: number }[];
+    figures: { label: string; caption: string; page?: number }[];
+    tables: { label: string; caption: string; page?: number }[];
+  };
+  references?: string[];
 };
 
 /**
@@ -48,6 +54,8 @@ export async function indexPdf(
   const insightsPromise = summarizeDocument(pages).catch(() => ({
     summary: "",
     suggestedQuestions: [],
+    structure: { sections: [], figures: [], tables: [] },
+    references: [],
   }));
 
   const admin = createAdminClient();
@@ -76,10 +84,20 @@ export async function indexPdf(
     }
   }
 
-  // Await the summary, then persist alongside the document so reads pick
-  // it up via GET /api/documents.
+  // Await the insights, then persist alongside the document so reads
+  // pick them up via GET /api/documents.
   const insights = await insightsPromise;
-  if (insights.summary || insights.suggestedQuestions.length > 0) {
+  const hasStructure =
+    insights.structure.sections.length > 0 ||
+    insights.structure.figures.length > 0 ||
+    insights.structure.tables.length > 0;
+
+  if (
+    insights.summary ||
+    insights.suggestedQuestions.length > 0 ||
+    hasStructure ||
+    insights.references.length > 0
+  ) {
     await admin
       .from("documents")
       .update({
@@ -88,6 +106,8 @@ export async function indexPdf(
           insights.suggestedQuestions.length > 0
             ? insights.suggestedQuestions
             : null,
+        structure: hasStructure ? insights.structure : null,
+        references: insights.references.length > 0 ? insights.references : null,
       })
       .eq("id", doc.id);
   }
@@ -99,5 +119,7 @@ export async function indexPdf(
     chunkCount: chunks.length,
     summary: insights.summary,
     suggestedQuestions: insights.suggestedQuestions,
+    structure: insights.structure,
+    references: insights.references,
   };
 }

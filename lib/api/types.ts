@@ -1,9 +1,27 @@
+export type DocumentStructure = {
+  sections: { title: string; page?: number }[];
+  figures: { label: string; caption: string; page?: number }[];
+  tables: { label: string; caption: string; page?: number }[];
+};
+
 export type DocumentRow = {
   id: string;
   title: string;
   page_count: number | null;
   summary: string | null;
   suggested_questions: string[] | null;
+  structure: DocumentStructure | null;
+  references: string[] | null;
+  created_at: string;
+};
+
+export type Annotation = {
+  id: number;
+  document_id: string;
+  chunk_id: number | null;
+  page_number: number | null;
+  text: string;
+  note: string | null;
   created_at: string;
 };
 
