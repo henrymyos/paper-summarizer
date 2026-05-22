@@ -60,9 +60,29 @@ export async function indexPdf(
 
   const admin = createAdminClient();
 
+  // Stash the original PDF in Supabase Storage so the in-app viewer
+  // can open the cited page. Path is namespaced by user so each
+  // visitor's PDFs are isolated.
+  const storagePath = `${userId}/${crypto.randomUUID()}.pdf`;
+  const { error: uploadErr } = await admin.storage
+    .from("pdfs")
+    .upload(storagePath, data as unknown as ArrayBuffer, {
+      contentType: "application/pdf",
+      upsert: false,
+    });
+  if (uploadErr) {
+    // Non-fatal — indexing still works, we just lose the PDF viewer.
+    console.warn("Failed to stash PDF in storage:", uploadErr.message);
+  }
+
   const { data: doc, error: docErr } = await admin
     .from("documents")
-    .insert({ user_id: userId, title, page_count: pageCount })
+    .insert({
+      user_id: userId,
+      title,
+      page_count: pageCount,
+      storage_path: uploadErr ? null : storagePath,
+    })
     .select()
     .single();
   if (docErr || !doc) throw docErr ?? new Error("insert documents failed");

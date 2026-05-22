@@ -13,7 +13,7 @@ export async function GET() {
   const { data, error } = await admin
     .from("documents")
     .select(
-      'id, title, page_count, summary, suggested_questions, structure, "references", created_at',
+      'id, title, page_count, summary, suggested_questions, structure, "references", storage_path, created_at',
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false });

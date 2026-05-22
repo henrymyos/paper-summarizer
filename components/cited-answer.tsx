@@ -10,6 +10,7 @@ type Props = {
   chunks: ApiChunk[];
   savedChunkIds: Set<number>;
   onToggleSave: (chunk: ApiChunk) => void;
+  onOpenSource?: (chunk: ApiChunk) => void;
 };
 
 export function CitedAnswer({
@@ -17,6 +18,7 @@ export function CitedAnswer({
   chunks,
   savedChunkIds,
   onToggleSave,
+  onOpenSource,
 }: Props) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
@@ -76,8 +78,18 @@ export function CitedAnswer({
                     </button>
                   </div>
                   {isOpen && (
-                    <div className="px-3 pb-3 -mt-1 text-zinc-300 leading-relaxed whitespace-pre-wrap">
-                      {c.text}
+                    <div className="px-3 pb-3 -mt-1 space-y-2">
+                      <div className="text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                        {c.text}
+                      </div>
+                      {onOpenSource && (
+                        <button
+                          onClick={() => onOpenSource(c)}
+                          className="text-[10px] uppercase tracking-wider text-[var(--accent)] hover:brightness-110"
+                        >
+                          Open in PDF →
+                        </button>
+                      )}
                     </div>
                   )}
                 </li>

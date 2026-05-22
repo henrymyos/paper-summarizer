@@ -12,6 +12,7 @@ export type DocumentRow = {
   suggested_questions: string[] | null;
   structure: DocumentStructure | null;
   references: string[] | null;
+  storage_path: string | null;
   created_at: string;
 };
 

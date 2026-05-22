@@ -13,12 +13,25 @@ import {
 import { BookmarkIcon } from "@/components/icons-extra";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useToast } from "@/components/toast";
+import { formatCost } from "@/lib/pricing";
+
+type UsageSummary = {
+  queries: number;
+  tokens: {
+    input_tokens: number;
+    output_tokens: number;
+    cache_read_tokens: number;
+    cache_creation_tokens: number;
+  };
+  estimatedCostUsd: number;
+};
 
 type Props = {
   documents: DocumentRow[];
   activeDocumentId: string | null;
   view: "chat" | "saved";
   annotationCount: number;
+  usage: UsageSummary | null;
   onSelect: (id: string | null) => void;
   onSelectSaved: () => void;
   onUploaded: (newDocumentId?: string) => void;
@@ -33,6 +46,7 @@ export function Sidebar({
   activeDocumentId,
   view,
   annotationCount,
+  usage,
   onSelect,
   onSelectSaved,
   onUploaded,
@@ -229,9 +243,7 @@ export function Sidebar({
         )}
       </div>
 
-      <div className="px-5 py-3 text-[11px] text-[var(--muted)] border-t border-[var(--border)]">
-        Built with Next.js, Supabase, Voyage AI, Claude.
-      </div>
+      <UsageFooter usage={usage} />
 
       <ConfirmDialog
         open={pendingDelete !== null}
@@ -249,6 +261,80 @@ export function Sidebar({
       />
     </aside>
     </>
+  );
+}
+
+function UsageFooter({ usage }: { usage: UsageSummary | null }) {
+  const [open, setOpen] = useState(false);
+  if (!usage || usage.queries === 0) {
+    return (
+      <div className="px-5 py-3 text-[11px] text-[var(--muted)] border-t border-[var(--border)]">
+        Built with Next.js, Supabase, Voyage AI, Claude.
+      </div>
+    );
+  }
+  const t = usage.tokens;
+  const cacheRate =
+    t.input_tokens + t.cache_read_tokens === 0
+      ? 0
+      : t.cache_read_tokens / (t.input_tokens + t.cache_read_tokens);
+
+  return (
+    <div className="border-t border-[var(--border)]">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full px-5 py-3 flex items-center justify-between text-[11px] text-[var(--muted)] hover:bg-zinc-900/60 transition-colors"
+      >
+        <span>
+          {usage.queries} {usage.queries === 1 ? "query" : "queries"}
+        </span>
+        <span className="font-mono text-[var(--accent)]">
+          {formatCost(usage.estimatedCostUsd)}
+        </span>
+      </button>
+      {open && (
+        <div className="px-5 pb-3 text-[10px] text-[var(--muted)] space-y-1">
+          <Row label="input tokens" value={t.input_tokens.toLocaleString()} />
+          <Row label="output tokens" value={t.output_tokens.toLocaleString()} />
+          <Row
+            label="cache reads"
+            value={t.cache_read_tokens.toLocaleString()}
+          />
+          {t.cache_creation_tokens > 0 && (
+            <Row
+              label="cache writes"
+              value={t.cache_creation_tokens.toLocaleString()}
+            />
+          )}
+          {cacheRate > 0 && (
+            <Row
+              label="cache hit rate"
+              value={`${(cacheRate * 100).toFixed(0)}%`}
+              accent
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <span>{label}</span>
+      <span className={`font-mono ${accent ? "text-[var(--accent)]" : ""}`}>
+        {value}
+      </span>
+    </div>
   );
 }
 

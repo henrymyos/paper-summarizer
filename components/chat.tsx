@@ -18,6 +18,8 @@ type Props = {
   onToggleSave: (chunk: ApiChunk) => void;
   onJumpToDocument: (id: string) => void;
   onOpenSidebar: () => void;
+  onUsageChange?: () => void;
+  onOpenSource?: (chunk: ApiChunk) => void;
 };
 
 export function Chat({
@@ -27,6 +29,8 @@ export function Chat({
   onToggleSave,
   onJumpToDocument,
   onOpenSidebar,
+  onUsageChange,
+  onOpenSource,
 }: Props) {
   const [tab, setTab] = useState<Tab>("chat");
   const toast = useToast();
@@ -206,6 +210,9 @@ export function Chat({
       if (pending) flush();
 
       if (streamErr) throw new Error(streamErr);
+
+      // Usage was just persisted server-side; refresh the sidebar chip.
+      onUsageChange?.();
     } catch (e) {
       setMessages((m) => m.filter((msg) => msg.id !== assistantId));
       const message = e instanceof Error ? e.message : "Ask failed.";
@@ -303,6 +310,7 @@ export function Chat({
                     chunks={m.chunks}
                     savedChunkIds={savedChunkIds}
                     onToggleSave={onToggleSave}
+                    onOpenSource={onOpenSource}
                   />
                 </li>
               ),
@@ -481,11 +489,13 @@ function AnswerCard({
   chunks,
   savedChunkIds,
   onToggleSave,
+  onOpenSource,
 }: {
   answer: string;
   chunks: ApiChunk[];
   savedChunkIds: Set<number>;
   onToggleSave: (chunk: ApiChunk) => void;
+  onOpenSource?: (chunk: ApiChunk) => void;
 }) {
   const isEmpty = answer.length === 0;
   return (
@@ -508,6 +518,7 @@ function AnswerCard({
           chunks={chunks}
           savedChunkIds={savedChunkIds}
           onToggleSave={onToggleSave}
+          onOpenSource={onOpenSource}
         />
       )}
     </div>

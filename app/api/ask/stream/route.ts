@@ -82,27 +82,41 @@ export async function POST(req: Request) {
 
         // Stream the answer, accumulating for persistence.
         let full = "";
+        let usage = {
+          input_tokens: 0,
+          output_tokens: 0,
+          cache_read_tokens: 0,
+          cache_creation_tokens: 0,
+        };
         const gen = streamAnswer(question, chunks);
         // eslint-disable-next-line no-constant-condition
         while (true) {
           const next = await gen.next();
           if (next.done) {
-            full = (next.value ?? full) as string;
+            if (next.value) {
+              full = next.value.full;
+              usage = next.value.usage;
+            }
             break;
           }
-          full += next.value;
-          send({ type: "token", text: next.value });
+          full += next.value.text;
+          send({ type: "token", text: next.value.text });
         }
 
-        // Persist the conversation after streaming completes.
+        // Persist the conversation and its token usage.
         await admin.from("queries").insert({
           user_id: userId,
           document_id: documentId ?? null,
           question,
           answer: full,
           cited_chunk_ids: chunks.map((c) => c.id),
+          input_tokens: usage.input_tokens,
+          output_tokens: usage.output_tokens,
+          cache_read_tokens: usage.cache_read_tokens,
+          cache_creation_tokens: usage.cache_creation_tokens,
         });
 
+        send({ type: "usage", usage });
         send({ type: "done" });
       } catch (err) {
         const message = err instanceof Error ? err.message : "Ask failed.";
