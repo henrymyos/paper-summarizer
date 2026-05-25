@@ -75,15 +75,15 @@ flowchart LR
 
 ## Screenshots
 
-> Drop your screenshots into `docs/screenshots/` and the links below will work.
-
-| Streaming answer with citations | Document structure tab |
+| Library overview | Streaming answer with citations |
 |---|---|
-| ![Streaming Q&A](docs/screenshots/streaming-qa.png) | ![Structure tab](docs/screenshots/structure.png) |
+| ![Library overview](docs/screenshots/01-overview.png) | ![Streaming Q&A](docs/screenshots/02-chat.png) |
 
-| References with cross-matching | Saved passages library |
+| Document structure tab | Saved passages library |
 |---|---|
-| ![References cross-match](docs/screenshots/references.png) | ![Saved passages](docs/screenshots/saved.png) |
+| ![Structure tab](docs/screenshots/03-structure.png) | ![Saved passages](docs/screenshots/05-saved.png) |
+
+> Captured at 1440×900 @ 2× DPI by `scripts/screenshots.ts` (Playwright). Regenerate locally with `npx tsx scripts/screenshots.ts`. The References tab also exists; it only activates when the indexed document has a parsed bibliography.
 
 ---
 
