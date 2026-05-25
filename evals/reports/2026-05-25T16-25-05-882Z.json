@@ -1,0 +1,338 @@
+{
+  "startedAt": "2026-05-25T16:25:05.882Z",
+  "aggregate": {
+    "cases_total": 8,
+    "cases_run": 8,
+    "cases_skipped": 0,
+    "mean_keyword_recall": 0.875,
+    "mean_faithfulness": 5,
+    "median_latency_ms": 57248,
+    "total_cost_usd": 0.02095164
+  },
+  "results": [
+    {
+      "caseId": "constitution-officers",
+      "documentTitle": "Disc Devils Constitution",
+      "question": "What officer positions does the club have and what are their terms?",
+      "status": "ok",
+      "retrieved": [
+        {
+          "id": 10,
+          "page": 2,
+          "preview": "Article IV - Officers Section 1 Officers of this Organization: A. President: 1. Schedule meetings, practice, and club re",
+          "rerankScore": 0.734375
+        },
+        {
+          "id": 11,
+          "page": 2,
+          "preview": "every April (or December if necessary) to determine officers for the next academic year. There will be no restrictions p",
+          "rerankScore": 0.59765625
+        },
+        {
+          "id": 8,
+          "page": 1,
+          "preview": "Disc Devils™ at ASU® - CONSTITUTION Constitution Reviewed: 4/29/25 PREAMBLE We the members of Disc Devils™ at ASU® agree",
+          "rerankScore": 0.50390625
+        },
+        {
+          "id": 14,
+          "page": 4,
+          "preview": "Signed ______Henry Myos______ Date ____4/17/25____ Henry Myos President Signed ______Nicholas Theimer_________ Date ____",
+          "rerankScore": 0.48828125
+        },
+        {
+          "id": 12,
+          "page": 3,
+          "preview": "C. Members will discuss the positions that need to be filled and state their case for whoever they wish to elect (other ",
+          "rerankScore": 0.419921875
+        }
+      ],
+      "topRerank": 0.734375,
+      "keywordHit": 4,
+      "keywordTotal": 4,
+      "faithfulness": 5,
+      "answer": "# Officer Positions and Terms\n\nThe club has three officer positions: **President, Vice President, and Officer** [1].\n\n**President** duties include scheduling meetings and events, assigning officers to roles, seeking sponsorships, assigning a faculty advisor, guiding club members, and serving as the interface between the club and other organizations [1].\n\n**Vice President** responsibilities include managing club finances, scheduling practices, and managing club inventory [1].\n\n**Officer** positions are elected by club members for specific voluntary duties as needed by the club, which may include student outreach, community service, and practice scheduling [1].\n\n**Term Length:** Officers are elected for a term of **two semesters for one academic year** [1]. Elections are held every April (or December if necessary) to determine officers for the next academic year, and there are no restrictions on how many terms a member may hold [1,2].",
+      "latencyMs": 5629,
+      "costUsd": 0.0032743
+    },
+    {
+      "caseId": "constitution-membership",
+      "documentTitle": "Disc Devils Constitution",
+      "question": "Who is eligible to join the Disc Devils club?",
+      "status": "ok",
+      "retrieved": [
+        {
+          "id": 9,
+          "page": 1,
+          "preview": "gender, disability, color, national origin, race, sexual orientation, or veteran status). Article III – Membership Secti",
+          "rerankScore": 0.87890625
+        },
+        {
+          "id": 8,
+          "page": 1,
+          "preview": "Disc Devils™ at ASU® - CONSTITUTION Constitution Reviewed: 4/29/25 PREAMBLE We the members of Disc Devils™ at ASU® agree",
+          "rerankScore": 0.7734375
+        },
+        {
+          "id": 12,
+          "page": 3,
+          "preview": "C. Members will discuss the positions that need to be filled and state their case for whoever they wish to elect (other ",
+          "rerankScore": 0.67578125
+        },
+        {
+          "id": 10,
+          "page": 2,
+          "preview": "Article IV - Officers Section 1 Officers of this Organization: A. President: 1. Schedule meetings, practice, and club re",
+          "rerankScore": 0.58203125
+        },
+        {
+          "id": 14,
+          "page": 4,
+          "preview": "Signed ______Henry Myos______ Date ____4/17/25____ Henry Myos President Signed ______Nicholas Theimer_________ Date ____",
+          "rerankScore": 0.337890625
+        }
+      ],
+      "topRerank": 0.87890625,
+      "keywordHit": 1,
+      "keywordTotal": 3,
+      "faithfulness": 5,
+      "answer": "# Disc Devils Club Eligibility\n\nTo join the Disc Devils club at ASU, you must be **a student enrolled in at least three (3) semester hours of University credit at ASU**. [1,2]\n\nAdditionally, the club welcomes **alumni, professional staff, or faculty to become associate members**, though these individuals have limited privileges compared to regular student members. [1]\n\nThere are **no membership dues or other membership requirements** beyond the enrollment criteria. [1]",
+      "latencyMs": 58695,
+      "costUsd": 0.00273586
+    },
+    {
+      "caseId": "constitution-amendment",
+      "documentTitle": "Disc Devils Constitution",
+      "question": "How can the constitution be amended?",
+      "status": "ok",
+      "retrieved": [
+        {
+          "id": 13,
+          "page": 3,
+          "preview": "President for updates. D. Become familiar with and serve as a resource on policies related to registered student organiz",
+          "rerankScore": 0.7890625
+        },
+        {
+          "id": 12,
+          "page": 3,
+          "preview": "C. Members will discuss the positions that need to be filled and state their case for whoever they wish to elect (other ",
+          "rerankScore": 0.53515625
+        },
+        {
+          "id": 14,
+          "page": 4,
+          "preview": "Signed ______Henry Myos______ Date ____4/17/25____ Henry Myos President Signed ______Nicholas Theimer_________ Date ____",
+          "rerankScore": 0.4609375
+        },
+        {
+          "id": 10,
+          "page": 2,
+          "preview": "Article IV - Officers Section 1 Officers of this Organization: A. President: 1. Schedule meetings, practice, and club re",
+          "rerankScore": 0.375
+        },
+        {
+          "id": 8,
+          "page": 1,
+          "preview": "Disc Devils™ at ASU® - CONSTITUTION Constitution Reviewed: 4/29/25 PREAMBLE We the members of Disc Devils™ at ASU® agree",
+          "rerankScore": 0.35546875
+        }
+      ],
+      "topRerank": 0.7890625,
+      "keywordHit": 3,
+      "keywordTotal": 3,
+      "faithfulness": 5,
+      "answer": "# How the Constitution Can Be Amended\n\nAccording to the passages, the constitution can be amended through the following process: [1]\n\nA proposed amendment must be presented to the members at least one week prior to a meeting at which the vote will be held. Ratification of an amendment requires a two-thirds majority of the voting membership of the members present at the meeting of the organization. [1]\n\nAdditionally, the constitution will be reviewed at minimum once an academic year for re-registration. [1]",
+      "latencyMs": 60234,
+      "costUsd": 0.00270442
+    },
+    {
+      "caseId": "hw-due-date",
+      "documentTitle": "CSE 310 HW1 — Henry Myos",
+      "question": "When is this homework due?",
+      "status": "ok",
+      "retrieved": [
+        {
+          "id": 1,
+          "page": 1,
+          "preview": "CSE 310 - Data Structures and Algorithms Fall 2025 Homework 1 Due Date: September 5 (Friday) 11:59 pm, 2025 Student Deta",
+          "rerankScore": 0
+        },
+        {
+          "id": 5,
+          "page": 4,
+          "preview": "Part B: Now consider the following array: (5 points) X = [19, 23, 35, 42, 47, 3 ] For this array what time complexity of",
+          "rerankScore": 0
+        },
+        {
+          "id": 4,
+          "page": 3,
+          "preview": "fi(n) 1 second 1 minute 1 hour 1 day 20n + 15 n11 n12 n13 n14 10n2 n21 n22 n23 n24 2n n31 n32 n33 n34 50 log2 n n41 n42 ",
+          "rerankScore": 0
+        },
+        {
+          "id": 3,
+          "page": 2,
+          "preview": "< (k + 1)kk < (k + 1)(k + 1)k = (k + 1)k+1 b) Multiply both sides by (k + 1). So, k!(k + 1) < (k + 1)kk. After expansion",
+          "rerankScore": 0
+        },
+        {
+          "id": 2,
+          "page": 2,
+          "preview": "mystery_function(n): sum = 0 for i from 0 to n-1: for j from 0 to n-1: for k from 0 to n-1: sum = sum + (i * j * k) retu",
+          "rerankScore": 0
+        }
+      ],
+      "topRerank": 0,
+      "keywordHit": 2,
+      "keywordTotal": 2,
+      "faithfulness": 5,
+      "answer": "Based on the passages provided:\n\nThis homework is due on **September 5 (Friday) at 11:59 pm, 2025** [1].",
+      "latencyMs": 59989,
+      "costUsd": 0.0023893
+    },
+    {
+      "caseId": "hw-sorting",
+      "documentTitle": "CSE 310 HW1 — Henry Myos",
+      "question": "Which sorting algorithm does the assignment ask the student to trace through?",
+      "status": "ok",
+      "retrieved": [
+        {
+          "id": 4,
+          "page": 3,
+          "preview": "fi(n) 1 second 1 minute 1 hour 1 day 20n + 15 n11 n12 n13 n14 10n2 n21 n22 n23 n24 2n n31 n32 n33 n34 50 log2 n n41 n42 ",
+          "rerankScore": 0
+        },
+        {
+          "id": 5,
+          "page": 4,
+          "preview": "Part B: Now consider the following array: (5 points) X = [19, 23, 35, 42, 47, 3 ] For this array what time complexity of",
+          "rerankScore": 0
+        },
+        {
+          "id": 1,
+          "page": 1,
+          "preview": "CSE 310 - Data Structures and Algorithms Fall 2025 Homework 1 Due Date: September 5 (Friday) 11:59 pm, 2025 Student Deta",
+          "rerankScore": 0
+        },
+        {
+          "id": 3,
+          "page": 2,
+          "preview": "< (k + 1)kk < (k + 1)(k + 1)k = (k + 1)k+1 b) Multiply both sides by (k + 1). So, k!(k + 1) < (k + 1)kk. After expansion",
+          "rerankScore": 0
+        },
+        {
+          "id": 2,
+          "page": 2,
+          "preview": "mystery_function(n): sum = 0 for i from 0 to n-1: for j from 0 to n-1: for k from 0 to n-1: sum = sum + (i * j * k) retu",
+          "rerankScore": 0
+        }
+      ],
+      "topRerank": 0,
+      "keywordHit": 1,
+      "keywordTotal": 1,
+      "faithfulness": 5,
+      "answer": "# Answer\n\nBased on the provided passages, the assignment asks the student to trace through **insertion sort** [1].\n\nIn Part A of the homework, students are given an unsorted array X = [37, 28, 42, 22, 19, 32] and instructed to \"Use insertion sort to sort the given array. You have to write each step representing the changes made to the array while running the algorithm\" [1]. Students must show the original array as Step 1, followed by all subsequent steps including the final sorted array, with the array to be sorted in ascending order from left to right [1].",
+      "latencyMs": 3889,
+      "costUsd": 0.00297172
+    },
+    {
+      "caseId": "hw-induction",
+      "documentTitle": "CSE 310 HW1 — Henry Myos",
+      "question": "What inequality is the induction proof asking the student to establish?",
+      "status": "ok",
+      "retrieved": [
+        {
+          "id": 2,
+          "page": 2,
+          "preview": "mystery_function(n): sum = 0 for i from 0 to n-1: for j from 0 to n-1: for k from 0 to n-1: sum = sum + (i * j * k) retu",
+          "rerankScore": 0
+        },
+        {
+          "id": 3,
+          "page": 2,
+          "preview": "< (k + 1)kk < (k + 1)(k + 1)k = (k + 1)k+1 b) Multiply both sides by (k + 1). So, k!(k + 1) < (k + 1)kk. After expansion",
+          "rerankScore": 0
+        },
+        {
+          "id": 5,
+          "page": 4,
+          "preview": "Part B: Now consider the following array: (5 points) X = [19, 23, 35, 42, 47, 3 ] For this array what time complexity of",
+          "rerankScore": 0
+        },
+        {
+          "id": 1,
+          "page": 1,
+          "preview": "CSE 310 - Data Structures and Algorithms Fall 2025 Homework 1 Due Date: September 5 (Friday) 11:59 pm, 2025 Student Deta",
+          "rerankScore": 0
+        },
+        {
+          "id": 4,
+          "page": 3,
+          "preview": "fi(n) 1 second 1 minute 1 hour 1 day 20n + 15 n11 n12 n13 n14 10n2 n21 n22 n23 n24 2n n31 n32 n33 n34 50 log2 n n41 n42 ",
+          "rerankScore": 0
+        }
+      ],
+      "topRerank": 0,
+      "keywordHit": 2,
+      "keywordTotal": 3,
+      "faithfulness": 5,
+      "answer": "# Answer\n\nBased on the passages provided, the induction proof is asking the student to establish the inequality:\n\n**n! < n^n for all positive integers n ≥ 2** [1]\n\nThis is stated in the problem: \"Use induction to prove that n! < n^n for all positive integers n ≥ 2.\" The proof then guides students through establishing this inequality by induction, with the inductive hypothesis being that k! < k^k for an arbitrary positive integer k ≥ 2, and the inductive step requiring students to show that (k+1)! < (k+1)^(k+1). [1,2]",
+      "latencyMs": 59192,
+      "costUsd": 0.00309866
+    },
+    {
+      "caseId": "resume-school",
+      "documentTitle": "My New Resume",
+      "question": "What university is the candidate currently attending and what is their GPA?",
+      "status": "ok",
+      "retrieved": [
+        {
+          "id": 7,
+          "page": 2,
+          "preview": "backed by Supabase with social and archive views. Wrote Postgres row-level security policies so each user can only read ",
+          "rerankScore": 0
+        },
+        {
+          "id": 6,
+          "page": 1,
+          "preview": "Henry Myos 15229 Swallow St NW Andover, MN 55304 (651) 376-9160 henrymyos@gmail.com Work Experience Chipotle Mexican Gri",
+          "rerankScore": 0
+        }
+      ],
+      "topRerank": 0,
+      "keywordHit": 2,
+      "keywordTotal": 2,
+      "faithfulness": 5,
+      "answer": "Based on the passages provided:\n\nThe candidate is currently attending **Arizona State University in Tempe, Arizona**, pursuing a Bachelor's degree in Computer Science. Their current **GPA is 4.00** [2].\n\nThe candidate is also on the Dean's List at the Ira A. Fulton Schools of Engineering for both Fall 2024 and Spring 2025 [2].",
+      "latencyMs": 2658,
+      "costUsd": 0.00149972
+    },
+    {
+      "caseId": "resume-projects",
+      "documentTitle": "My New Resume",
+      "question": "What programming languages and frameworks has the candidate used in projects?",
+      "status": "ok",
+      "retrieved": [
+        {
+          "id": 6,
+          "page": 1,
+          "preview": "Henry Myos 15229 Swallow St NW Andover, MN 55304 (651) 376-9160 henrymyos@gmail.com Work Experience Chipotle Mexican Gri",
+          "rerankScore": 0
+        },
+        {
+          "id": 7,
+          "page": 2,
+          "preview": "backed by Supabase with social and archive views. Wrote Postgres row-level security policies so each user can only read ",
+          "rerankScore": 0
+        }
+      ],
+      "topRerank": 0,
+      "keywordHit": 4,
+      "keywordTotal": 4,
+      "faithfulness": 5,
+      "answer": "# Programming Languages and Frameworks Used\n\nBased on the resume, the candidate has used the following programming languages and frameworks:\n\n**Languages:** Python, JavaScript, TypeScript, Java, and HTML/CSS [1]\n\n**Frameworks and Libraries:** \n- Frontend: React, Next.js, Tailwind [1]\n- Data/Analytics: Pandas, Plotly, Streamlit [1]\n- Backend/Database: Supabase (Postgres + Auth), Firebase, SQL/Postgres [1]\n- Validation: Zod [1]\n\nThe candidate has applied these technologies across several projects, including a Disc Golf Performance Analytics dashboard using Python/Pandas/Plotly/Streamlit, a full-stack Fantasy Disc Golf platform built with Next.js/React/TypeScript/Tailwind/Supabase, and a Disc Golf Bag Builder web app using HTML/CSS/JavaScript/Supabase [1,2].",
+      "latencyMs": 55801,
+      "costUsd": 0.00227766
+    }
+  ]
+}

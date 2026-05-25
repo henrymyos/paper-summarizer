@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "index-pdf": "tsx scripts/index-pdf.ts",
-    "ask": "tsx scripts/ask.ts"
+    "ask": "tsx scripts/ask.ts",
+    "eval": "tsx scripts/eval.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.96.0",

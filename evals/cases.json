@@ -1,0 +1,62 @@
+{
+  "version": "1.0",
+  "description": "Held-out Q/A pairs evaluated against the live RAG pipeline. Each case targets a real document in the demo library; documents not present in a given run are skipped with a warning.",
+  "cases": [
+    {
+      "id": "constitution-officers",
+      "document_title": "Disc Devils Constitution",
+      "question": "What officer positions does the club have and what are their terms?",
+      "expected_facts": ["President", "Vice President", "Officer", "two semesters"],
+      "rubric": "Lists at least two of the three officer roles (President / Vice President / Officer) AND mentions term length (two semesters or one year)."
+    },
+    {
+      "id": "constitution-membership",
+      "document_title": "Disc Devils Constitution",
+      "question": "Who is eligible to join the Disc Devils club?",
+      "expected_facts": ["ASU", "students", "3 semester hours"],
+      "rubric": "Mentions ASU enrollment and the 3-semester-hour requirement."
+    },
+    {
+      "id": "constitution-amendment",
+      "document_title": "Disc Devils Constitution",
+      "question": "How can the constitution be amended?",
+      "expected_facts": ["two-thirds", "majority", "vote"],
+      "rubric": "Mentions a two-thirds majority vote (or super-majority) as the amendment threshold."
+    },
+    {
+      "id": "hw-due-date",
+      "document_title": "CSE 310 HW1 — Henry Myos",
+      "question": "When is this homework due?",
+      "expected_facts": ["September 5", "2025"],
+      "rubric": "States the due date is September 5, 2025 (or any clear restatement of that calendar date)."
+    },
+    {
+      "id": "hw-sorting",
+      "document_title": "CSE 310 HW1 — Henry Myos",
+      "question": "Which sorting algorithm does the assignment ask the student to trace through?",
+      "expected_facts": ["insertion sort"],
+      "rubric": "Identifies insertion sort as the algorithm being asked about."
+    },
+    {
+      "id": "hw-induction",
+      "document_title": "CSE 310 HW1 — Henry Myos",
+      "question": "What inequality is the induction proof asking the student to establish?",
+      "expected_facts": ["n!", "n^n", "less than"],
+      "rubric": "Names the inequality n! < n^n (or a paraphrased equivalent: 'n factorial is less than n to the n')."
+    },
+    {
+      "id": "resume-school",
+      "document_title": "My New Resume",
+      "question": "What university is the candidate currently attending and what is their GPA?",
+      "expected_facts": ["Arizona State", "4.0"],
+      "rubric": "Identifies Arizona State University and a 4.00 / 4.0 GPA."
+    },
+    {
+      "id": "resume-projects",
+      "document_title": "My New Resume",
+      "question": "What programming languages and frameworks has the candidate used in projects?",
+      "expected_facts": ["Python", "TypeScript", "Next.js", "Supabase"],
+      "rubric": "Mentions at least three of: Python, TypeScript / JavaScript, React, Next.js, Pandas, Supabase, Streamlit, Plotly. Generic 'web development' alone is not sufficient."
+    }
+  ]
+}

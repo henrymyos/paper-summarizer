@@ -189,6 +189,38 @@ npm run ask -- "What did the paper conclude?"
 
 ---
 
+## Evaluation
+
+The pipeline ships with an offline evaluation harness — a held-out set of question/answer pairs scored automatically against the live retrieval + generation stack.
+
+```bash
+npm run eval
+```
+
+For each case in `evals/cases.json` it:
+
+1. Embeds the question with Voyage `voyage-3` (`input_type: query`).
+2. Pulls the top 20 chunks from pgvector via the `match_chunks` RPC.
+3. Reranks them with Voyage `rerank-2` down to top-5.
+4. Generates an answer with Claude Haiku 4.5 grounded only on the retrieved passages.
+5. Scores the answer two ways:
+   - **Keyword recall** — what fraction of `expected_facts` appear in the answer.
+   - **Faithfulness** — Claude-as-judge gives an integer 1–5 score against a per-case rubric.
+
+A JSON report is written to `evals/reports/<ISO timestamp>.json` with per-case retrieval, answer, scores, latency, and cost.
+
+### Most recent run (8 cases against the demo library)
+
+| Metric | Value |
+|---|---|
+| Cases run | 8 / 8 |
+| Mean keyword recall | 88% |
+| Mean faithfulness (Claude judge) | 5.00 / 5 |
+| Median pipeline latency | ~4 s |
+| Total cost | $0.021 |
+
+Wall-clock latency in the printed log includes Voyage free-tier rate-limit sleeps (3 RPM). With a paid Voyage key those drop out and the median falls to the actual API time.
+
 ## Repository layout
 
 ```
@@ -221,6 +253,13 @@ proxy.ts              sets visitor_id cookie on first request
 scripts/
   index-pdf.ts        CLI: index a PDF
   ask.ts              CLI: ask a question
+  eval.ts             eval harness — runs evals/cases.json end-to-end
+  backfill-insights.ts re-extract structure/references on existing docs
+  screenshots.ts      Playwright capture of desktop README shots
+  screenshots-mobile.ts mobile (iPhone-14) variant
+evals/
+  cases.json          held-out Q/A pairs with rubrics
+  reports/            JSON outputs from each eval run
 supabase/
   schema.sql          full DB schema (tables, indexes, RLS, RPC)
 ```
