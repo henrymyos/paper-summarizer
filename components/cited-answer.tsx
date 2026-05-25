@@ -66,7 +66,7 @@ export function CitedAnswer({
                     </button>
                     <button
                       onClick={() => onToggleSave(c)}
-                      className={`px-2 py-2 transition-colors ${
+                      className={`flex items-center justify-center w-10 h-10 sm:w-9 sm:h-9 shrink-0 transition-colors ${
                         isSaved
                           ? "text-[var(--accent)]"
                           : "text-[var(--muted)] hover:text-zinc-200"
@@ -74,7 +74,7 @@ export function CitedAnswer({
                       aria-label={isSaved ? "Remove from saved" : "Save passage"}
                       title={isSaved ? "Remove from saved" : "Save passage"}
                     >
-                      <BookmarkIcon className="w-3.5 h-3.5" filled={isSaved} />
+                      <BookmarkIcon className="w-4 h-4" filled={isSaved} />
                     </button>
                   </div>
                   {isOpen && (

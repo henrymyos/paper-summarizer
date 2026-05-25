@@ -102,7 +102,7 @@ export function MarkdownAnswer({ text, onCitationClick }: Props) {
         <button
           type="button"
           onClick={() => onCitationClick?.(n)}
-          className="inline-flex items-center justify-center align-baseline mx-0.5 px-1.5 py-0.5 text-[10px] font-mono not-italic
+          className="inline-flex items-center justify-center align-baseline mx-0.5 min-w-[1.4rem] h-5 px-1.5 text-[11px] font-mono not-italic
                      rounded-md bg-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/30 transition-colors"
           aria-label={`Source ${n}`}
         >

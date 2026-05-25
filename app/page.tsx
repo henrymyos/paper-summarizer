@@ -131,7 +131,7 @@ function PageInner() {
   }
 
   return (
-    <div className="h-screen flex">
+    <div className="h-dvh flex">
       <Sidebar
         documents={documents}
         activeDocumentId={view === "chat" ? activeId : null}

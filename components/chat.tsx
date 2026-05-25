@@ -389,14 +389,16 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+      title={label}
+      aria-label={label}
+      className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 sm:py-1 rounded-md text-[11px] font-medium transition-colors ${
         active
           ? "bg-[var(--accent)]/15 text-[var(--accent)]"
           : "text-zinc-400 hover:text-zinc-100"
       }`}
     >
       {icon}
-      {label}
+      <span className="hidden sm:inline">{label}</span>
     </button>
   );
 }

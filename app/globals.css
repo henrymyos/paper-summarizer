@@ -21,6 +21,8 @@
 html, body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Block any rogue horizontal overflow at the document level. */
+  overflow-x: hidden;
 }
 
 /* Ambient blue glow in the page background — gives the dark theme depth
