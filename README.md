@@ -75,6 +75,8 @@ flowchart LR
 
 ## Screenshots
 
+### Desktop
+
 | Library overview | Streaming answer with citations |
 |---|---|
 | ![Library overview](docs/screenshots/01-overview.png) | ![Streaming Q&A](docs/screenshots/02-chat.png) |
@@ -83,7 +85,22 @@ flowchart LR
 |---|---|
 | ![Structure tab](docs/screenshots/03-structure.png) | ![Saved passages](docs/screenshots/05-saved.png) |
 
-> Captured at 1440×900 @ 2× DPI by `scripts/screenshots.ts` (Playwright). Regenerate locally with `npx tsx scripts/screenshots.ts`. The References tab also exists; it only activates when the indexed document has a parsed bibliography.
+### Mobile
+
+<table>
+  <tr>
+    <td width="33%"><b>Empty state</b><br><img src="docs/screenshots/mobile/01-empty.png" alt="Mobile empty state" /></td>
+    <td width="33%"><b>Sidebar drawer</b><br><img src="docs/screenshots/mobile/02-drawer.png" alt="Mobile sidebar drawer" /></td>
+    <td width="33%"><b>Chat with citations</b><br><img src="docs/screenshots/mobile/03-chat.png" alt="Mobile chat" /></td>
+  </tr>
+  <tr>
+    <td><b>Structure tab</b><br><img src="docs/screenshots/mobile/04-structure.png" alt="Mobile structure tab" /></td>
+    <td><b>Saved passages</b><br><img src="docs/screenshots/mobile/05-saved.png" alt="Mobile saved passages" /></td>
+    <td></td>
+  </tr>
+</table>
+
+> Desktop shots captured at 1440×900 @ 2× DPI by `scripts/screenshots.ts`; mobile at 390×844 @ 3× DPI (iPhone-14 viewport) by `scripts/screenshots-mobile.ts`. Both regenerate via Playwright with `npx tsx scripts/screenshots.ts` or `…screenshots-mobile.ts`. The References tab only activates when the indexed document has a parsed bibliography.
 
 ---
 
